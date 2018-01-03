@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FAQQueryWithDoubleSearch.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">sample-spring-boot-kitchensink</a> &gt; <a href="index.source.html" class="el_package">com.example.bot.spring</a> &gt; <span class="el_source">FAQQueryWithDoubleSearch.java</span></div><h1>FAQQueryWithDoubleSearch.java</h1><pre class="source lang-java linenums">package com.example.bot.spring;
+
+import java.sql.*;
+
+<span class="fc" id="L5">public class FAQQueryWithDoubleSearch implements QueryBehaviour {</span>
+	private PreparedStatement stmt;
+	private Connection connection;
+	private ResultSet rs;
+	
+	public String query (PreparedStatement stmt, Connection connection, String text, String result) throws SQLException
+	{
+		String keyword, response;
+
+<span class="fc" id="L14">		String exactText = text.substring(7).toLowerCase();</span>
+
+		//Second batch of search: variable which store the current information
+<span class="pc bpc" id="L17" title="10 of 34 branches missed.">		switch(exactText)</span>
+		{
+		//Modifiable FAQ through variables
+		case &quot;apply&quot;:
+<span class="fc" id="L21">			stmt = connection.prepareStatement(&quot;SELECT keyword, info FROM companyinfo WHERE keyword like concat ('%', ?, '%')&quot;);</span>
+<span class="fc" id="L22">			stmt.setString(1, &quot;&lt;application method&gt;&quot;);</span>
+<span class="fc" id="L23">			rs = stmt.executeQuery();</span>
+<span class="fc" id="L24">			rs.next();</span>
+<span class="fc" id="L25">			result = result.replaceFirst(&quot;&lt;application method&gt;&quot;, rs.getString(2));</span>
+
+<span class="fc" id="L27">			stmt = connection.prepareStatement(&quot;SELECT keyword, info FROM companyinfo WHERE keyword like concat ('%', ?, '%')&quot;);</span>
+<span class="fc" id="L28">			stmt.setString(1, &quot;&lt;payment method&gt;&quot;);</span>
+<span class="fc" id="L29">			rs = stmt.executeQuery();</span>
+<span class="fc" id="L30">			rs.next();</span>
+<span class="fc" id="L31">			result = result.replaceFirst(&quot;&lt;payment method&gt;&quot;, rs.getString(2));</span>
+
+<span class="fc" id="L33">			stmt = connection.prepareStatement(&quot;SELECT keyword, info FROM companyinfo WHERE keyword like concat ('%', ?, '%')&quot;);</span>
+<span class="fc" id="L34">			stmt.setString(1, &quot;&lt;evidence&gt;&quot;);</span>
+<span class="fc" id="L35">			rs = stmt.executeQuery();</span>
+<span class="fc" id="L36">			rs.next();</span>
+<span class="fc" id="L37">			result = result.replaceFirst(&quot;&lt;evidence&gt;&quot;, rs.getString(2));</span>
+
+<span class="fc" id="L39">			break;</span>
+
+		case &quot;insurance&quot;:
+<span class="fc" id="L42">			stmt = connection.prepareStatement(&quot;SELECT keyword, info FROM companyinfo WHERE keyword like concat ('%', ?, '%')&quot;);</span>
+<span class="fc" id="L43">			stmt.setString(1, &quot;&lt;insurance&gt;&quot;);</span>
+<span class="fc" id="L44">			rs = stmt.executeQuery();</span>
+<span class="fc" id="L45">			rs.next();</span>
+<span class="fc" id="L46">			result = result.replaceFirst(&quot;&lt;insurance&gt;&quot;, rs.getString(2));</span>
+
+<span class="fc" id="L48">			break;</span>
+
+		case &quot;tour cancelled&quot;:
+<span class="fc" id="L51">			stmt = connection.prepareStatement(&quot;SELECT keyword, info FROM companyinfo WHERE keyword like concat ('%', ?, '%')&quot;);</span>
+<span class="fc" id="L52">			stmt.setString(1, &quot;&lt;dayTourCancelledInformed&gt;&quot;);</span>
+<span class="fc" id="L53">			rs = stmt.executeQuery();</span>
+<span class="fc" id="L54">			rs.next();</span>
+<span class="fc" id="L55">			result = result.replaceFirst(&quot;&lt;dayTourCancelledInformed&gt;&quot;, rs.getString(2));</span>
+
+<span class="fc" id="L57">			break;</span>
+
+		case &quot;additional charge&quot;:
+<span class="fc" id="L60">			stmt = connection.prepareStatement(&quot;SELECT keyword, info FROM companyinfo WHERE keyword like concat ('%', ?, '%')&quot;);</span>
+<span class="fc" id="L61">			stmt.setString(1, &quot;&lt;additionalServiceCharge&gt;&quot;);</span>
+<span class="fc" id="L62">			rs = stmt.executeQuery();</span>
+<span class="fc" id="L63">			rs.next();</span>
+<span class="fc" id="L64">			result = result.replaceFirst(&quot;&lt;additionalServiceCharge&gt;&quot;, rs.getString(2));</span>
+
+<span class="fc" id="L66">			break;</span>
+
+		case &quot;hotel bed&quot;:
+<span class="fc" id="L69">			stmt = connection.prepareStatement(&quot;SELECT keyword, info FROM companyinfo WHERE keyword like concat ('%', ?, '%')&quot;);</span>
+<span class="fc" id="L70">			stmt.setString(1, &quot;&lt;additionalBedCharge&gt;&quot;);</span>
+<span class="fc" id="L71">			rs = stmt.executeQuery();</span>
+<span class="fc" id="L72">			rs.next();</span>
+<span class="fc" id="L73">			result = result.replaceFirst(&quot;&lt;additionalBedCharge&gt;&quot;, rs.getString(2));</span>
+
+<span class="fc" id="L75">			break;</span>
+
+		case &quot;tour fee&quot;:
+<span class="fc" id="L78">			stmt = connection.prepareStatement(&quot;SELECT keyword, info FROM companyinfo WHERE keyword like concat ('%', ?, '%')&quot;);</span>
+<span class="fc" id="L79">			stmt.setString(1, &quot;&lt;age3fee&gt;&quot;);</span>
+<span class="fc" id="L80">			rs = stmt.executeQuery();</span>
+<span class="fc" id="L81">			rs.next();</span>
+<span class="fc" id="L82">			result = result.replaceFirst(&quot;&lt;age3fee&gt;&quot;, rs.getString(2));</span>
+
+<span class="fc" id="L84">			stmt = connection.prepareStatement(&quot;SELECT keyword, info FROM companyinfo WHERE keyword like concat ('%', ?, '%')&quot;);</span>
+<span class="fc" id="L85">			stmt.setString(1, &quot;&lt;age4to11fee&gt;&quot;);</span>
+<span class="fc" id="L86">			rs = stmt.executeQuery();</span>
+<span class="fc" id="L87">			rs.next();</span>
+<span class="fc" id="L88">			result = result.replaceFirst(&quot;&lt;age4to11fee&gt;&quot;, rs.getString(2));</span>
+
+<span class="fc" id="L90">			break;</span>
+
+		case &quot;deadline&quot;:
+<span class="fc" id="L93">			stmt = connection.prepareStatement(&quot;SELECT keyword, info FROM companyinfo WHERE keyword like concat ('%', ?, '%')&quot;);</span>
+<span class="fc" id="L94">			stmt.setString(1, &quot;&lt;deadlineOfTrip&gt;&quot;);</span>
+<span class="fc" id="L95">			rs = stmt.executeQuery();</span>
+<span class="fc" id="L96">			rs.next();</span>
+<span class="fc" id="L97">			result = result.replaceFirst(&quot;&lt;deadlineOfTrip&gt;&quot;, rs.getString(2));</span>
+
+<span class="fc" id="L99">			break;</span>
+
+		case &quot;tour size&quot;:
+<span class="fc" id="L102">			stmt = connection.prepareStatement(&quot;SELECT keyword, info FROM companyinfo WHERE keyword like concat ('%', ?, '%')&quot;);</span>
+<span class="fc" id="L103">			stmt.setString(1, &quot;&lt;sizeOfTour&gt;&quot;);</span>
+<span class="fc" id="L104">			rs = stmt.executeQuery();</span>
+<span class="fc" id="L105">			rs.next();</span>
+<span class="fc" id="L106">			result = result.replaceFirst(&quot;&lt;sizeOfTour&gt;&quot;, rs.getString(2));</span>
+
+			break;
+		}
+<span class="fc" id="L110">		return result;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

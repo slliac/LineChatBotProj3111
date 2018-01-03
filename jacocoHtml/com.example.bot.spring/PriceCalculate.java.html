@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PriceCalculate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">sample-spring-boot-kitchensink</a> &gt; <a href="index.source.html" class="el_package">com.example.bot.spring</a> &gt; <span class="el_source">PriceCalculate.java</span></div><h1>PriceCalculate.java</h1><pre class="source lang-java linenums">package com.example.bot.spring;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.logging.Logger;
+import java.net.URISyntaxException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+
+/**
+ * 
+ * PriceCalculate class extends from Gordon 
+ * 
+ * @author Gordon
+ *
+ */
+public class PriceCalculate {
+
+	public Tourist tourist;
+	
+	public List&lt;Integer&gt; childnumList;
+	public List&lt;Integer&gt; AdultnumList;
+	public List&lt;Integer&gt; toodlernumList;
+	public int childnum;
+	public int adultnum;
+	public int toodlernum;
+	public List&lt;String&gt; TripList;
+	public String [] Description;
+	//public List&lt;Integer&gt; price ; 
+	public Person price1;
+	public Person price2;
+	public Person price3;
+	public List&lt;Integer&gt; paid;
+<span class="fc" id="L46">	public boolean back_school = false;</span>
+	public Activity activities_discount;
+	public int [] price ;
+<span class="fc" id="L49">	Connection connection = null;</span>
+<span class="fc" id="L50">	PreparedStatement stmt = null;</span>
+<span class="fc" id="L51">	ResultSet rs = null;</span>
+	
+	/**
+	 * 
+	 * We would likely to develop the function for calculated the price
+	 * by different class that we used.
+	 * 
+	 * 
+	 * 
+	 * @param t is the tourist that come from customer
+	 * 
+	 * 
+	 */
+<span class="fc" id="L64">	public PriceCalculate(Tourist t) {</span>
+<span class="fc" id="L65">		childnumList = new ArrayList&lt;Integer&gt;();</span>
+<span class="fc" id="L66">		AdultnumList= new ArrayList&lt;Integer&gt;();</span>
+<span class="fc" id="L67">		toodlernumList= new ArrayList&lt;Integer&gt;();</span>
+<span class="fc" id="L68">		TripList = new ArrayList&lt;String&gt;();</span>
+<span class="fc" id="L69">		paid = new ArrayList&lt;Integer&gt;();</span>
+		try {
+<span class="fc" id="L71">		int tripPrice = getTripprice(&quot;tripB&quot;);</span>
+<span class="fc" id="L72">		this.tourist = t;</span>
+		try {
+<span class="fc" id="L74">			connection = getConnection4();</span>
+		}
+<span class="nc" id="L76">		catch (URISyntaxException e1) {</span>
+			//log.info(&quot;URISyntaxException while closing file: {}&quot;, e1.toString());
+		}
+<span class="fc" id="L79">		catch (SQLException e2) {</span>
+			//log.info(&quot;URISyntaxException while closing file: {}&quot;, e2.toString());
+<span class="pc" id="L81">		}</span>
+<span class="fc" id="L82">		stmt = connection.prepareStatement(&quot;SELECT childnum,adultnum,toodlernum,tripname,amount_paid from TourInf where name = ? &quot;);</span>
+<span class="fc" id="L83">		stmt.setString(1,tourist.getName());</span>
+<span class="fc" id="L84">        rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">	    while(rs.next()) {</span>
+<span class="fc" id="L86">	    	childnumList.add(rs.getInt(&quot;childnum&quot;));</span>
+<span class="fc" id="L87">	    	AdultnumList.add(rs.getInt(&quot;adultnum&quot;));</span>
+<span class="fc" id="L88">	    	toodlernumList.add(rs.getInt(&quot;toodlernum&quot;));</span>
+<span class="fc" id="L89">	    	TripList.add(rs.getString(&quot;tripname&quot;));</span>
+<span class="fc" id="L90">	    	paid.add(rs.getInt(&quot;amount_paid&quot;));</span>
+	    }
+<span class="fc" id="L92">	    price1 = new Child(tripPrice); // inherited from Person class</span>
+<span class="fc" id="L93">	    activities_discount = new BackSchoolDiscount(price1);</span>
+<span class="fc" id="L94">	    price2 = new Adult(tripPrice);</span>
+<span class="fc" id="L95">	    price3 = new Toodler(tripPrice);</span>
+<span class="fc" id="L96">	    price = new int[childnumList.size()]; // refer as the number of query not the size</span>
+<span class="fc" id="L97">        Description = new String[childnumList.size()+1];</span>
+<span class="fc" id="L98">        Description[0] = &quot;*** Hello , here are the price and money that you pay for trip *** \n &quot;;</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">for(int q = 0 ; q &lt; childnumList.size(); q++) {</span>
+<span class="fc" id="L100">	    int ChildPrice = 0 ; </span>
+<span class="fc" id="L101">	    int AdultPrice = 0 ; </span>
+<span class="fc" id="L102">	    int ToodlerPrice = 0;</span>
+<span class="fc" id="L103">	    Description[q] = &quot;\n  \n &quot;+Integer.toString(q+1) +&quot;. Trip Name : &quot; + TripList.get(q) + &quot;\n&quot;;</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">	    for(int i = 0 ; i &lt; childnumList.get(q) ; i++) {</span>
+<span class="fc" id="L105">	    price[q] += activities_discount.getPrice();</span>
+<span class="fc" id="L106">	    ChildPrice += activities_discount.getPrice();</span>
+	    }
+<span class="fc" id="L108">	    Description[q] += &quot;Children x &quot;+childnumList.get(q)+&quot; 's Price (After 80 % on for Child Policy and 80 % on again BackSchool Discount) : &quot; + ChildPrice + &quot;\n&quot;;</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">	    for(int i = 0 ; i &lt; AdultnumList.get(q) ; i++) {</span>
+<span class="fc" id="L110">	    price[q] += price2.getPrice();</span>
+<span class="fc" id="L111">	    AdultPrice += price2.getPrice();</span>
+	    }
+<span class="fc" id="L113">	    Description[q] += &quot;Adult x &quot; + AdultnumList.get(q)+&quot; 's Price (Normal Price) : &quot; + AdultPrice + &quot;\n&quot;;</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">	    for(int i = 0 ; i &lt; toodlernumList.get(q) ; i++) {</span>
+<span class="fc" id="L115">	    price[q] += price3.getPrice();</span>
+<span class="fc" id="L116">	    ToodlerPrice += price3.getPrice();</span>
+	    }
+<span class="fc" id="L118">	    Description[q] += &quot;Toodler x &quot;+ toodlernumList.get(q)+ &quot; (Free) : &quot; + ToodlerPrice + &quot;\n&quot;;</span>
+<span class="fc" id="L119">	    Description[q] += &quot;Total Price :  &quot; + price[q] + &quot;\n&quot;;</span>
+<span class="fc" id="L120">	    Description[q] += &quot;Paid  Money :  &quot; + paid.get(q) + &quot;\n&quot;;</span>
+<span class="fc" id="L121">	    Description[q] += &quot;Money that you still to pay for this trip :  &quot; + (price[q]- paid.get(q))  + &quot;\n \n&quot;;</span>
+        //System.out.println(Description[q]);
+}
+
+<span class="fc" id="L125">		}catch(Exception e) {</span>
+			//log.info(&quot;SQLException while closing file: {}&quot;, e3.toString());
+		}
+		finally {
+<span class="nc" id="L129">			try {</span>
+<span class="pc bpc" id="L130" title="4 of 6 branches missed.">				if(rs!=null)</span>
+<span class="pc" id="L131">					rs.close();</span>
+<span class="pc bpc" id="L132" title="4 of 6 branches missed.">				if(stmt!=null)</span>
+<span class="pc" id="L133">					stmt.close();</span>
+<span class="pc bpc" id="L134" title="4 of 6 branches missed.">				if(connection!=null)</span>
+<span class="pc" id="L135">					connection.close();</span>
+			}
+<span class="nc" id="L137">			catch (SQLException e4) {</span>
+				//log.info(&quot;SQLException while closing file: {}&quot;, e4.toString());
+<span class="pc" id="L139">			}</span>
+<span class="nc" id="L140">		}</span>
+		
+<span class="fc" id="L142">	}</span>
+	
+	/**
+	 * 
+	 * it calculated the tripprice finally
+	 * 
+	 * @param tripName is the tripName that we used
+	 * @return the tripprice
+	 */
+	
+	
+	public int getTripprice(String tripName) {
+<span class="fc" id="L154">		int price  = 0 ;</span>
+		try {
+<span class="fc" id="L156">			connection = getConnection4();</span>
+<span class="fc" id="L157">			stmt = connection.prepareStatement(&quot;SELECT tourfee from Tour WHERE tourname = ? &quot;);</span>
+<span class="fc" id="L158">			stmt.setString(1,tripName);</span>
+<span class="fc" id="L159">			rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">			while(rs.next()) {		</span>
+<span class="fc" id="L161">			   price = rs.getInt(&quot;tourfee&quot;);</span>
+			}
+<span class="fc" id="L163">		    rs.close();</span>
+<span class="fc" id="L164">		    stmt.close();</span>
+<span class="fc" id="L165">		    connection.close();</span>
+		    //System.out.println(&quot;Here are haha price&quot;+price);
+<span class="fc" id="L167">		    return price;</span>
+<span class="fc" id="L168">		}catch(Exception e) {</span>
+<span class="fc" id="L169">			System.out.println(e.getMessage());</span>
+		}
+<span class="fc" id="L171">		return price;</span>
+	}
+	
+	
+	/**
+	 * get the coupon finally
+	 * @return the coupon number that we used.
+	 */
+	public int getCoupon() {
+	
+<span class="fc" id="L181">		int CouponNum = 0;</span>
+		try {
+<span class="fc" id="L183">		connection = getConnection4();</span>
+<span class="fc" id="L184">		stmt = connection.prepareStatement(&quot;SELECT coupon FROM client where engname = ? &quot;);</span>
+<span class="fc" id="L185">		stmt.setString(1,tourist.getName());</span>
+<span class="fc" id="L186">		rs = stmt.executeQuery();</span>
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">		while(rs.next()) {</span>
+<span class="nc" id="L188">			CouponNum = rs.getInt(&quot;coupon&quot;);			</span>
+		}
+		
+<span class="fc" id="L191">		System.out.println(CouponNum);</span>
+<span class="fc" id="L192">		return CouponNum;</span>
+	
+<span class="fc" id="L194">		}catch(Exception e) {</span>
+			
+		}
+<span class="fc" id="L197">		return CouponNum;</span>
+	}
+	
+	
+	/**
+	 * 
+	 * price of calculated each trip
+	 * 
+	 * @param tripName is inputted by customer recently
+	 * @return the price of each trip 
+	 */
+
+	public int PriceCalculateForTrip(String tripName) {
+		try {
+			//int r = getTripprice(&quot;tripB&quot;);
+<span class="fc" id="L212">			int test = 0 ;</span>
+<span class="fc" id="L213">			int tripPrice = getTripprice(tripName);</span>
+<span class="fc" id="L214">			int childnum  = 0;</span>
+<span class="fc" id="L215">			int adultnum  = 0;</span>
+<span class="fc" id="L216">			int toodlernum = 0;</span>
+<span class="fc" id="L217">			int Couponnum = getCoupon();</span>
+<span class="fc" id="L218">			connection = getConnection4();</span>
+<span class="fc" id="L219">			stmt = connection.prepareStatement(&quot;SELECT childnum,adultnum,toodlernum,tripname,amount_paid from TourInf where name = ? and tripname = ? order by date DESC&quot;);</span>
+<span class="fc" id="L220">			stmt.setString(1,tourist.getName());</span>
+<span class="fc" id="L221">			stmt.setString(2,tripName);</span>
+<span class="fc" id="L222">			rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L223" title="All 2 branches covered.">			while(rs.next()) {</span>
+<span class="fc" id="L224">				childnum = rs.getInt(&quot;childnum&quot;);</span>
+<span class="fc" id="L225">				adultnum = rs.getInt(&quot;adultnum&quot;);</span>
+<span class="fc" id="L226">				toodlernum = rs.getInt(&quot;toodlernum&quot;);				</span>
+			}
+			
+<span class="fc" id="L229">			  price1 = new Child(tripPrice); </span>
+<span class="fc" id="L230">			  activities_discount = new BackSchoolDiscount(price1);</span>
+<span class="fc" id="L231">			  price2 = new Adult(tripPrice);</span>
+			  //System.out.println(&quot;Coupon 's Discount 1: &quot; + price2.getPrice());
+<span class="fc" id="L233">			  Activity activity_discount2  = new Coupon(price2);</span>
+			  //System.out.println(&quot;Coupon 's Discount 2 : &quot; + activity_discount2.getPrice());
+<span class="fc" id="L235">			  price3 = new Toodler(tripPrice);</span>
+<span class="fc" id="L236">		    int price =  0 ; </span>
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">		    for(int i = 0 ; i &lt; childnum ; i++)</span>
+<span class="nc" id="L238">		    price += activities_discount.getPrice();</span>
+		    
+<span class="fc" id="L240">		    int counter = 0;</span>
+<span class="pc bpc" id="L241" title="1 of 2 branches missed.">		    if(adultnum - Couponnum &gt;= 0) {</span>
+<span class="pc bpc" id="L242" title="1 of 2 branches missed.">		    for(; counter &lt; Couponnum; counter++) {</span>
+<span class="nc" id="L243">		    	price += price2.getPrice();  </span>
+		    }
+		    
+<span class="fc bfc" id="L246" title="All 2 branches covered.">		    for(int i = 0 ; i &lt; (adultnum - Couponnum) ; i++)</span>
+<span class="fc" id="L247">		    price += activity_discount2.getPrice();  </span>
+		    }else {
+<span class="nc bnc" id="L249" title="All 2 branches missed.">		    	  for(int i = 0 ; i &lt; adultnum ; i++)</span>
+<span class="nc" id="L250">		  		  price += price2.getPrice();  </span>
+		    	
+		    }
+		    
+<span class="fc" id="L254">		    price += price3.getPrice();    </span>
+<span class="fc" id="L255">		    rs.close();</span>
+<span class="fc" id="L256">		    stmt.close();</span>
+<span class="fc" id="L257">		    connection.close();</span>
+<span class="fc" id="L258">		    System.out.println(&quot;Hello ,  here are your tested price : &quot;+price);</span>
+<span class="fc" id="L259">		    return price;</span>
+		    
+		    
+<span class="fc" id="L262">		}catch(Exception e){</span>
+<span class="fc" id="L263">			System.out.println(e.getMessage());</span>
+<span class="fc" id="L264">			return 10000;</span>
+		}
+	  
+	}
+	
+	/**
+	 * 
+	 * get the price of customer
+	 * 
+	 * @param i = index of price List
+	 * @return the price according to index
+	 */
+	
+	public int getPriceOfCustomer(int i) {
+		// for final payment use
+<span class="nc" id="L279">		return price[i];   </span>
+	}
+	
+	
+	/**
+	 * 
+	 * get the description of customer
+	 * 
+	 * @param i  = index of Description 
+	 * @return description with the index
+	 */
+	public String getDescription(int i) {
+		// for shown the out balance to customer
+<span class="fc" id="L292">		return Description[i]; </span>
+	}
+	
+	
+	/**
+	 * 
+	 * get the size of customers
+	 * 
+	 * 
+	 * @return the size of customer list
+	 */
+	public int getSizeOfCustomer() {
+		// for given size of customer to reference
+<span class="fc" id="L305">		return childnumList.size();</span>
+	}
+	
+	
+	/**
+	 * 
+	 * get connection function
+	 * 
+	 * @return
+	 * @throws URISyntaxException exception of url
+	 * @throws SQLException sql exception 
+	 */
+	private Connection getConnection4() throws URISyntaxException, SQLException {
+		Connection connection;
+<span class="fc" id="L319">		URI dbUri = new URI(&quot;postgres://itniqlvmjieeeq:1bf7632721043bf02f0f498974ece3939ed3e947b9c96435ca0ced9d06593f33@ec2-107-22-235-167.compute-1.amazonaws.com:5432/daj5i9364g5dfv&quot;);</span>
+<span class="fc" id="L320">		String username = dbUri.getUserInfo().split(&quot;:&quot;)[0];</span>
+<span class="fc" id="L321">		String password = dbUri.getUserInfo().split(&quot;:&quot;)[1];</span>
+<span class="fc" id="L322">		String dbUrl = &quot;jdbc:postgresql://&quot; + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath() +  &quot;?ssl=true&amp;sslfactory=org.postgresql.ssl.NonValidatingFactory&quot;;</span>
+		//log.info(&quot;Username: {} Password: {}&quot;, username, password);
+		//log.info (&quot;dbUrl: {}&quot;, dbUrl);
+<span class="fc" id="L325">		connection = DriverManager.getConnection(dbUrl, username, password);</span>
+
+<span class="fc" id="L327">		return connection;</span>
+	}
+	
+	
+	
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

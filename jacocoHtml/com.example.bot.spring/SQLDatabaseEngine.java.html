@@ -1,0 +1,826 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLDatabaseEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">sample-spring-boot-kitchensink</a> &gt; <a href="index.source.html" class="el_package">com.example.bot.spring</a> &gt; <span class="el_source">SQLDatabaseEngine.java</span></div><h1>SQLDatabaseEngine.java</h1><pre class="source lang-java linenums">package com.example.bot.spring;
+import lombok.extern.slf4j.Slf4j;
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+import java.net.URISyntaxException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+//Billy imported two date for Feature3.1 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+
+<span class="fc" id="L19">@Slf4j</span>
+<span class="fc" id="L20">public class SQLDatabaseEngine extends DatabaseEngine {</span>
+	
+	// tourist made in here
+<span class="fc" id="L23">	public Tourist tmp = null;</span>
+<span class="fc" id="L24">	int eei = 0 ;</span>
+	// test case 2 : D.Chan
+	//public Tourist tmp = new Tourist(&quot;D.Chan&quot;,0);
+	
+	public void updateClientName(String userId, String name) throws Exception {
+		try {
+<span class="nc" id="L30">			Connection connection = getConnection();</span>
+<span class="nc" id="L31">			PreparedStatement stmt = connection.prepareStatement(&quot;UPDATE Client SET engname = ? WHERE lid = ?&quot;);</span>
+<span class="nc" id="L32">			stmt.setString(1, name);</span>
+<span class="nc" id="L33">			stmt.setString(2, userId);</span>
+<span class="nc" id="L34">			stmt.executeQuery();</span>
+<span class="nc" id="L35">		}catch(SQLException e) {</span>
+<span class="nc" id="L36">			System.out.println(e.toString());</span>
+<span class="nc" id="L37">		}</span>
+<span class="nc" id="L38">		return;</span>
+	}
+	
+	
+	public int getConversationStatus(String userId) throws Exception {
+		try {
+<span class="nc" id="L44">			Connection connection = getConnection();</span>
+<span class="nc" id="L45">			PreparedStatement stmt = connection.prepareStatement(&quot;SELECT converStatus FROM Client WHERE lid = ?&quot;);</span>
+<span class="nc" id="L46">			stmt.setString(1, userId);</span>
+<span class="nc" id="L47">			ResultSet rs = stmt.executeQuery();</span>
+			
+<span class="nc bnc" id="L49" title="All 2 branches missed.">			if(rs.next()) {</span>
+<span class="nc" id="L50">				return rs.getInt(1);</span>
+			}
+			
+<span class="nc" id="L53">		}catch(SQLException e) {</span>
+<span class="nc" id="L54">			System.out.println(e.toString());</span>
+<span class="nc" id="L55">		}</span>
+<span class="nc" id="L56">		return 0;</span>
+	}
+	
+	public void setConversationStatus(String userId, Integer status) throws Exception {
+		try {
+<span class="nc" id="L61">			Connection connection = getConnection();</span>
+<span class="nc" id="L62">			PreparedStatement stmt = connection.prepareStatement(&quot;UPDATE Client SET converStatus = ? WHERE lid = ?&quot;);</span>
+<span class="nc" id="L63">			stmt.setInt(1, status);</span>
+<span class="nc" id="L64">			stmt.setString(2, userId);</span>
+<span class="nc" id="L65">			stmt.executeQuery();</span>
+			
+<span class="nc" id="L67">		}catch(SQLException e) {</span>
+<span class="nc" id="L68">			System.out.println(e.toString());</span>
+<span class="nc" id="L69">		}</span>
+<span class="nc" id="L70">		return;</span>
+	}
+	
+	
+	public boolean checkClient(String userId) throws Exception {
+		try {
+<span class="nc" id="L76">			Connection connection = getConnection();</span>
+<span class="nc" id="L77">			PreparedStatement stmt = connection.prepareStatement(&quot;SELECT * from client WHERE lid = ?&quot;);</span>
+<span class="nc" id="L78">			stmt.setString(1, userId);</span>
+<span class="nc" id="L79">			ResultSet rs = stmt.executeQuery();</span>
+			
+<span class="nc bnc" id="L81" title="All 2 branches missed.">			if(rs.next()) {</span>
+<span class="nc" id="L82">				return true;</span>
+			}		
+<span class="nc" id="L84">		}catch(SQLException e) {</span>
+<span class="nc" id="L85">			System.out.println(e.toString());</span>
+<span class="nc" id="L86">		}</span>
+<span class="nc" id="L87">		return false;</span>
+	}
+	
+	public void addClient(String userId) throws Exception {
+		try {
+<span class="nc" id="L92">			Connection connection = getConnection();</span>
+<span class="nc" id="L93">			PreparedStatement stmt = connection.prepareStatement(&quot;INSERT INTO client (lid, converStatus) VALUES (?, 0);&quot;);</span>
+<span class="nc" id="L94">			stmt.setString(1, userId);</span>
+<span class="nc" id="L95">			stmt.executeUpdate();</span>
+			
+<span class="nc" id="L97">		}catch(SQLException e) {</span>
+<span class="nc" id="L98">			System.out.println(e.toString());</span>
+<span class="nc" id="L99">		}</span>
+<span class="nc" id="L100">		return;</span>
+	}
+	
+	/** Mediator Design Pattern is used */
+	/**
+	* This method acts as a mediator to determine what method should be called to handle the request. 
+	* @param text This is a parameter to take the complete sentence that client inputted. 
+	* @return String This returns of the reply message.
+	*/
+//	Super Method to identify which of the following functions to be called.
+	public String switchFunctions(String text,String name) throws Exception{
+		
+		try {
+<span class="fc" id="L113">			String name1 = null;</span>
+<span class="fc" id="L114">			Connection connection = getConnection();</span>
+<span class="fc" id="L115">			PreparedStatement stmt = connection.prepareStatement(&quot;SELECT name FROM Tourinf where id = ? order by name ASC;&quot;);</span>
+<span class="fc" id="L116">			stmt.setString(1,name);</span>
+<span class="fc" id="L117">			ResultSet rs = stmt.executeQuery();</span>
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">			while(rs.next()) {</span>
+<span class="nc" id="L119">    			name1 = rs.getString(&quot;name&quot;);</span>
+    		    }
+			//System.out.println(&quot;the name is &quot; + name1);
+			// udpate of tourist
+<span class="fc bfc" id="L123" title="All 2 branches covered.">			if(tmp == null)</span>
+<span class="fc" id="L124">			tmp = new Tourist(name1,0);</span>
+			else {
+<span class="fc" id="L126">			tmp = new Tourist(name1,0);</span>
+			}
+<span class="fc" id="L128">		}catch(Exception e) {</span>
+			
+<span class="fc" id="L130">		}</span>
+		
+		
+<span class="fc" id="L133">		String output=&quot;&quot;;</span>
+		
+		
+		
+		
+		
+<span class="fc bfc" id="L139" title="All 2 branches covered.">		if( text.toLowerCase().contains(&quot;keyword&quot;)) {</span>
+<span class="fc" id="L140">			output = searchByKeywords(text);</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">		}else if( text.toLowerCase().contains(&quot;details of &quot;) ){</span>
+<span class="fc" id="L142">			output = displayTour(text);</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">		}else if( text.toLowerCase().contains(&quot;search&quot;) ){</span>
+<span class="fc" id="L144">			output = search(text,&quot;&quot;);</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">		}else if( text.toLowerCase().contains(&quot;survey&quot;)) {</span>
+<span class="fc" id="L146">			output = rating(text);</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">		}else if ( text.toLowerCase().contains(&quot;recommend&quot;) ){</span>
+<span class="fc" id="L148">			output = recommendation(text);</span>
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">		}else if (text.toLowerCase().contains(&quot;hi&quot;)||</span>
+<span class="pc bpc" id="L150" title="1 of 2 branches missed.">				text.toLowerCase().contains(&quot;hey&quot;)||</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">				text.toLowerCase().contains(&quot;hello&quot;)){</span>
+<span class="fc" id="L152">			output = dynamicGreeting();</span>
+
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">		}else if ( text.toLowerCase().contains(&quot;thank you&quot;))</span>
+		{
+<span class="fc" id="L156">			output = &quot;Thank you.&quot;;</span>
+		}else {
+<span class="nc" id="L158">			output = &quot;Sorry, we don't have answer for this.&quot;;</span>
+		}
+<span class="fc" id="L160">		return output;</span>
+	}
+	
+
+	/**
+	 *  Feature 1: Dynamic Greeting
+	 * @return
+	 */
+	public String dynamicGreeting() {
+
+		//sth not implemented: How the last Shenzhen trip was, Billy? It is nice to see you again!
+
+<span class="fc" id="L172">		return &quot;Welcome. What can I help you?&quot;;</span>
+	}
+	
+	/** Mediator Design Pattern is used */
+	/**
+	* this function create a discount record in the Database. 
+	* @param couponID A coupon ID is required to create a discount record in the database. 
+	* @param amount The number of discounts to give out. 
+	* @param percentOff The discount to be offered (percentOff should be 50 if 50% discount is offered). 
+	* @return boolean Return True if the discount record can be created successfully, False if not.
+	*/
+	public boolean createDiscount(String couponID, int amount, int percentOff) throws Exception {
+<span class="fc bfc" id="L184" title="All 6 branches covered.">		if (couponID.isEmpty() || amount&lt;=0 || percentOff &lt;= 0)</span>
+<span class="fc" id="L185">			return false;</span>
+<span class="fc" id="L186">		boolean flag = false;</span>
+		try {
+			//CHECK IF EXISTING
+<span class="fc" id="L189">			Connection connection = getConnection();</span>
+<span class="fc" id="L190">			PreparedStatement stmt = connection.prepareStatement(&quot;SELECT Remaining FROM Coupon WHERE CouponID = ?&quot;);</span>
+<span class="fc" id="L191">			stmt.setString(1, couponID);</span>
+<span class="fc" id="L192">			ResultSet rs = stmt.executeQuery();</span>
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">			if (rs.next()) {</span>
+<span class="fc" id="L194">				return false;</span>
+			}
+			//INSERT
+<span class="nc" id="L197">			int rows=0;</span>
+//			Connection connection = getConnection();
+<span class="nc" id="L199">			stmt = connection.prepareStatement(&quot;INSERT INTO Coupon (CouponID, Remaining, discount) VALUES (?, ?, ?);&quot;);</span>
+<span class="nc" id="L200">			stmt.setString(1, couponID);</span>
+<span class="nc" id="L201">			stmt.setInt(2, amount);</span>
+<span class="nc" id="L202">			stmt.setInt(3, percentOff);</span>
+<span class="nc" id="L203">			rows = stmt.executeUpdate();</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">			if (rows==0)</span>
+<span class="nc" id="L205">				flag = false;</span>
+			else
+<span class="nc" id="L207">				flag = true;	</span>
+<span class="nc" id="L208">			stmt.close();</span>
+<span class="nc" id="L209">			connection.close();</span>
+<span class="nc" id="L210">		}catch(SQLException e) {</span>
+//			System.out.println(e.toString());
+<span class="nc" id="L212">		}</span>
+<span class="nc" id="L213">		return flag;</span>
+	}
+	public boolean deleteDiscount(String couponID) {
+		try {
+<span class="nc" id="L217">			Connection connection = getConnection();</span>
+<span class="nc" id="L218">			PreparedStatement stmt = connection.prepareStatement(&quot;DELETE FROM Coupon WHERE CouponID = ?&quot;);</span>
+<span class="nc" id="L219">			stmt.setString(1, couponID);</span>
+<span class="nc" id="L220">			int rows=0;</span>
+<span class="nc" id="L221">			rows = stmt.executeUpdate();</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">			if (rows&gt;0)</span>
+<span class="nc" id="L223">				return true;</span>
+			else
+<span class="nc" id="L225">				return false;</span>
+<span class="nc" id="L226">		}catch(Exception e) {}</span>
+<span class="nc" id="L227">		return false;</span>
+	}
+	
+	/**
+	* This function reduces the number of the coupon in the Database, then give a discount COUPON to a client by adding the coupon String in the client record. 
+	* @param clientID A client ID is required to add the discount String in the client record. 
+	* @param couponID A coupon ID is required to retrieve corresponding coupon in the database. 
+	* @return boolean Return True if the discount record can be transferred successfully, False if not.
+	*/
+	public boolean getDiscount(String clientID, String couponID) throws Exception {
+<span class="pc bpc" id="L237" title="2 of 4 branches missed.">		if (clientID.isEmpty()||couponID.isEmpty())</span>
+<span class="nc" id="L238">			return false;</span>
+<span class="fc" id="L239">		boolean flag=false;</span>
+		try{
+<span class="fc" id="L241">			Connection connection = null;</span>
+<span class="fc" id="L242">			PreparedStatement stmt = null;</span>
+<span class="fc" id="L243">			connection = getConnection();</span>
+<span class="fc" id="L244">			ResultSet rs = null;</span>
+			//Check remaining number of coupon
+<span class="fc" id="L246">			stmt = connection.prepareStatement(&quot;SELECT Remaining FROM Coupon WHERE CouponID=?&quot;);</span>
+<span class="fc" id="L247">			stmt.setString(1, couponID);</span>
+<span class="fc" id="L248">			rs = stmt.executeQuery();</span>
+<span class="fc" id="L249">			int num=-1;</span>
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">			while(rs.next()) {</span>
+<span class="nc" id="L251">				num = Integer.parseInt(rs.getString(1));</span>
+			}
+<span class="pc bpc" id="L253" title="1 of 2 branches missed.">			if (num&gt;0) {</span>
+				//Check if the client has already owned the coupon
+<span class="nc" id="L255">				stmt = connection.prepareStatement(&quot;SELECT Coupon FROM client WHERE CID=?&quot;);</span>
+<span class="nc" id="L256">				stmt.setString(1, clientID);</span>
+<span class="nc" id="L257">				rs = stmt.executeQuery();</span>
+<span class="nc" id="L258">				String ownedCoupon=&quot;&quot;;</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">				while(rs.next()) {</span>
+<span class="nc" id="L260">					ownedCoupon = rs.getString(1);</span>
+				}
+<span class="nc bnc" id="L262" title="All 2 branches missed.">				if (ownedCoupon.contains(couponID)==false) {</span>
+<span class="nc" id="L263">					int rows=0;</span>
+					//Retrieving info from DB
+<span class="nc" id="L265">					stmt = connection.prepareStatement(&quot;UPDATE client SET Coupon=CONCAT(Coupon,?) WHERE CID=?&quot;);</span>
+<span class="nc" id="L266">					stmt.setString(1, couponID);</span>
+<span class="nc" id="L267">					stmt.setString(2, clientID);</span>
+<span class="nc" id="L268">					rows = stmt.executeUpdate();</span>
+					//Returning results
+<span class="nc bnc" id="L270" title="All 2 branches missed.">					if (rows==0) {</span>
+<span class="nc" id="L271">						flag = false;</span>
+					}else {
+<span class="nc" id="L273">						stmt = connection.prepareStatement(&quot;UPDATE Coupon SET Remaining = Remaining - 1 WHERE CouponID=?&quot;);</span>
+<span class="nc" id="L274">						stmt.setString(1, couponID);</span>
+<span class="nc" id="L275">						rows = stmt.executeUpdate();</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">						if (rows == 0)</span>
+<span class="nc" id="L277">							flag=false;</span>
+<span class="nc" id="L278">						flag=true;</span>
+					}
+				}
+			}
+<span class="fc" id="L282">			rs.close();</span>
+<span class="fc" id="L283">			stmt.close();</span>
+<span class="fc" id="L284">			connection.close();</span>
+<span class="nc" id="L285">		}catch(Exception e) {</span>
+//			log.info(&quot;Exception: &quot;, e.toString());
+//			output = e.toString();
+<span class="pc" id="L288">		} finally { }</span>
+<span class="fc" id="L289">		return flag;</span>
+	}
+	
+	/**
+	* Feature 0
+	* this function displays the details of a tour, including Tour Fee, Date, Location, Deadline of application. 
+	* @param text This is a parameter to take the complete sentence that client inputted. 
+	* @return String This returns of the reply message.
+	*/
+	public String displayTour(String text) throws Exception {
+<span class="fc" id="L299">		String wording=&quot;details of &quot;;</span>
+<span class="fc" id="L300">		String output=&quot;&quot;;</span>
+<span class="pc bpc" id="L301" title="1 of 2 branches missed.">		if (text.toLowerCase().contains(wording)==false){</span>
+<span class="nc" id="L302">			return &quot;Sorry but your input format was invalid~&quot;;</span>
+		}
+		try{
+<span class="fc" id="L305">			Connection connection = null;</span>
+<span class="fc" id="L306">			PreparedStatement stmt = null;</span>
+<span class="fc" id="L307">			ResultSet rs = null; </span>
+<span class="fc" id="L308">			connection = getConnection();</span>
+			//Get the keyword
+<span class="fc" id="L310">			String target=&quot;&quot;;</span>
+<span class="pc bpc" id="L311" title="1 of 2 branches missed.">			if (text.toLowerCase().contains(wording)) {</span>
+<span class="fc" id="L312">				int startInt = text.toLowerCase().indexOf(wording)+wording.length();</span>
+//				int endInt = text.toLowerCase().indexOf(&quot; &quot;, startInt);
+//				if (endInt==-1) {
+<span class="fc" id="L315">					target = text.substring(startInt);</span>
+//				}else {
+//					target = text.substring(startInt,endInt);
+//				}
+			}
+<span class="pc bpc" id="L320" title="3 of 6 branches missed.">			if ( &quot;?&quot;.equals( target.substring(target.length()-1,target.length())) || &quot;,&quot;.equals( target.substring(target.length()-1,target.length())) || &quot;!&quot;.equals( target.substring(target.length()-1,target.length())) )</span>
+<span class="nc" id="L321">				target = target.substring(0,target.length()-1);</span>
+			//Retrieving info from DB
+<span class="fc" id="L323">			stmt = connection.prepareStatement(&quot;SELECT tourfee,date_start,date_end,location,application_deadline FROM tour WHERE tourname = ? &quot;);</span>
+<span class="fc" id="L324">			stmt.setString(1, target);</span>
+<span class="fc" id="L325">			rs = stmt.executeQuery();</span>
+			//Returning results
+<span class="fc bfc" id="L327" title="All 2 branches covered.">			while(rs.next()) {</span>
+<span class="fc" id="L328">				output += &quot;Details of tour &quot;+target+&quot;: \n&quot;;</span>
+<span class="fc" id="L329">				output += &quot;Tour Fee: &quot; + rs.getString(1)+&quot;\n&quot;;</span>
+<span class="fc" id="L330">				output += &quot;Date: \t&quot; + rs.getString(2) + &quot; - &quot; +rs.getString(3)+&quot;\n&quot;;</span>
+<span class="fc" id="L331">				output += &quot;Location: &quot; + rs.getString(4)+&quot;\n&quot;;</span>
+<span class="fc" id="L332">				output += &quot;Application Deadline: &quot; + rs.getString(5)+&quot;\n&quot;+&quot;\n&quot;;</span>
+<span class="fc" id="L333">				output += &quot;Book it now by typing in: \&quot;book,[tourname],[your name],[adult],[child],[toodler]\&quot;! &quot; ;</span>
+			}
+<span class="pc bpc" id="L335" title="1 of 2 branches missed.">			if (output.equals(&quot;&quot;)) {</span>
+<span class="nc" id="L336">				output+=&quot;Oops, no related result found. \n\n&quot;;</span>
+<span class="nc" id="L337">				output+=recommendation(text);</span>
+			}
+<span class="fc" id="L339">			rs.close();</span>
+<span class="fc" id="L340">			stmt.close();</span>
+<span class="fc" id="L341">			connection.close();</span>
+<span class="nc" id="L342">		}catch(Exception e) {</span>
+//			log.info(&quot;Exception: &quot;, e.toString());
+//			output = e.toString();
+<span class="nc" id="L345">			return &quot;Sorry but your input format was invalid~&quot;;</span>
+<span class="pc" id="L346">		} finally { }</span>
+<span class="pc bpc" id="L347" title="1 of 2 branches missed.">		if (output.equals(&quot;&quot;)) {</span>
+<span class="nc" id="L348">			output+=&quot;Sorry but your input format was invalid~&quot;;</span>
+		}
+<span class="fc" id="L350">		return output;</span>
+	}
+	
+	/**
+	* Feature 9.2 
+	* this function recommend the name of a trip that has the highest rating. 
+	* @param text This is a parameter to take the complete sentence that client inputted. 
+	* @return String This returns of the reply message.
+	*/
+	public String recommendation(String text) throws Exception {
+<span class="fc" id="L360">		String output=&quot;&quot;;</span>
+<span class="fc" id="L361">		ArrayList&lt;String&gt; tripList = new ArrayList&lt;String&gt;();</span>
+<span class="fc" id="L362">		Connection connection = getConnection();</span>
+<span class="fc" id="L363">		PreparedStatement stmt = null;</span>
+<span class="fc" id="L364">		ResultSet rs = null; </span>
+<span class="fc" id="L365">		stmt = connection.prepareStatement(&quot;SELECT trip, AVG(rate) AS avg_rate FROM survey GROUP BY trip ORDER BY trip&quot;);</span>
+<span class="fc" id="L366">		rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L367" title="All 2 branches covered.">		while(rs.next()) {</span>
+<span class="fc" id="L368">			tripList.add( rs.getString(1) );</span>
+		}
+<span class="fc" id="L370">		output = &quot;Would you like to try &quot;+tripList.get(0)+&quot;? It has the highest rating from other tourists! &quot;;</span>
+<span class="fc" id="L371">		return output;</span>
+	}
+//	FEATURE 9.3
+	public String rating(String text) throws Exception {
+		try {
+<span class="fc" id="L376">			String[] wd = text.split(&quot;:&quot;);</span>
+<span class="fc" id="L377">			Connection connection = getConnection();</span>
+<span class="fc" id="L378">			PreparedStatement stmt = connection.prepareStatement(&quot;INSERT INTO survey (trip, rate) VALUES (?, ?);&quot;);</span>
+<span class="fc" id="L379">			stmt.setString(1, wd[1]);</span>
+<span class="fc" id="L380">			stmt.setInt(2, Integer.parseInt(wd[2]));</span>
+<span class="fc" id="L381">			stmt.executeUpdate();</span>
+<span class="fc" id="L382">			return &quot;Thank you for your opinion!&quot;;	</span>
+<span class="nc" id="L383">		}catch(SQLException e) {</span>
+<span class="nc" id="L384">			System.out.println(e.toString());</span>
+		}
+<span class="nc" id="L386">		return &quot;Fail&quot;;</span>
+	}
+	
+	
+	void updatePrice(String bookingDetails[],String userId,int price) {
+		
+		try {
+<span class="fc" id="L393">			   Connection connection = getConnection();</span>
+<span class="fc" id="L394">			   PreparedStatement stmt = connection.prepareStatement(&quot;UPDATE TourInf SET tourfee = ? WHERE name = ? and tripname = ? and adultnum = ? and childnum = ? and toodlernum = ? &quot;);</span>
+<span class="fc" id="L395">			   stmt.setInt(1,price);</span>
+<span class="fc" id="L396">			   stmt.setString(2,userId);</span>
+<span class="fc" id="L397">			   stmt.setString(3,bookingDetails[1]);</span>
+<span class="fc" id="L398">			   stmt.setInt(4,Integer.parseInt(bookingDetails[3]));</span>
+<span class="fc" id="L399">			   stmt.setInt(5,Integer.parseInt(bookingDetails[4]));</span>
+<span class="fc" id="L400">			   stmt.setInt(6,Integer.parseInt(bookingDetails[5]));</span>
+<span class="fc" id="L401">			   stmt.executeUpdate();</span>
+<span class="fc" id="L402">			   stmt.close();</span>
+<span class="fc" id="L403">			   connection.close();</span>
+<span class="fc" id="L404">		}catch(Exception e) {</span>
+			
+			
+<span class="fc" id="L407">		}</span>
+		
+<span class="fc" id="L409">	}</span>
+	
+	
+	
+//	FEATURE 5
+	String booking(String bookingDetails[],String userId) throws Exception {
+		try { //
+<span class="fc" id="L416">			Connection connection = getConnection();</span>
+<span class="fc" id="L417">			PreparedStatement stmt = connection.prepareStatement(&quot;Select location,latitude,longitude,date_start,tid from tour where tourname = ?&quot;);</span>
+<span class="fc" id="L418">			stmt.setString(1,bookingDetails[1]);	</span>
+<span class="fc" id="L419">			ResultSet rs = null;</span>
+<span class="fc" id="L420">			rs = stmt.executeQuery();</span>
+<span class="fc" id="L421">			rs.next();</span>
+<span class="fc" id="L422">			connection.close();</span>
+			
+<span class="fc" id="L424">			Connection connection2 = getConnection();</span>
+<span class="fc" id="L425">			PreparedStatement stmt2 = connection2.prepareStatement(&quot;INSERT INTO tourinf (name, adultnum, childnum, toodlernum, tripname, amount_paid,location,latitude,longitude,tid,tourfee, id, date,tripstatus) VALUES(?,?,?,?,?,0,?,?,?,?,1000,?,?,1)&quot;);</span>
+<span class="fc" id="L426">			stmt2.setString(1, bookingDetails[2]);</span>
+<span class="fc" id="L427">			stmt2.setInt(2, Integer.parseInt(bookingDetails[3]));</span>
+<span class="fc" id="L428">			stmt2.setInt(3, Integer.parseInt(bookingDetails[4]));</span>
+<span class="fc" id="L429">			stmt2.setInt(4, Integer.parseInt(bookingDetails[5]));</span>
+<span class="fc" id="L430">			stmt2.setString(5, bookingDetails[1]);</span>
+<span class="nc" id="L431">			stmt2.setString(6, rs.getString(1));</span>
+<span class="nc" id="L432">			stmt2.setDouble(7, rs.getDouble(2));</span>
+<span class="nc" id="L433">			stmt2.setDouble(8, rs.getDouble(3));</span>
+<span class="nc" id="L434">			stmt2.setString(9, rs.getString(5));</span>
+<span class="nc" id="L435">			stmt2.setString(10, userId);</span>
+<span class="nc" id="L436">			stmt2.setDate(11, rs.getDate(4));</span>
+<span class="nc" id="L437">			stmt2.executeUpdate();</span>
+<span class="nc" id="L438">			Date dateUpdated  = rs.getDate(4);</span>
+<span class="nc" id="L439">			connection2.close();</span>
+			
+//			StatusName statusCaller = new StatusName();
+//			statusCaller.notAll();
+<span class="nc" id="L443">			Tourist tmp = new Tourist(bookingDetails[2],0); // Assume D.Chan joined the tripB and Trip B cost 1000 HKD for adult,800 for child.child got 80% on against because of Back school discount</span>
+<span class="nc" id="L444">			PriceCalculate pc = new PriceCalculate(tmp);</span>
+<span class="nc" id="L445">			int price = pc.PriceCalculateForTrip(bookingDetails[1]);</span>
+<span class="nc" id="L446">			StatusName status = new StatusName(bookingDetails[1]);  // status tmp update</span>
+			//for(int i = 0 ; i &lt; 10; i++)
+<span class="nc" id="L448">		    status.notAll(); 		</span>
+<span class="nc" id="L449">		    updatePrice(bookingDetails, bookingDetails[2],price);</span>
+<span class="nc" id="L450">			return &quot;Tour &quot; + bookingDetails[1] + &quot; has been booked. Please be reminded to pay HKD &quot;+price+&quot; before the trip start.&quot;;</span>
+			
+			
+<span class="fc" id="L453">		}catch(SQLException e) {</span>
+<span class="fc" id="L454">			System.out.println(e.toString());</span>
+<span class="fc" id="L455">			return &quot;Fail to book. Please contact our staff.&quot;;</span>
+		}
+	}
+	
+	public boolean checkTour(String tour) throws Exception {
+		try {
+<span class="fc" id="L461">			Connection connection = getConnection();</span>
+<span class="fc" id="L462">			PreparedStatement stmt = connection.prepareStatement(&quot;SELECT * FROM tour WHERE tourname = ?&quot;);</span>
+<span class="fc" id="L463">			stmt.setString(1, tour);</span>
+<span class="fc" id="L464">			ResultSet rs= stmt.executeQuery();</span>
+			
+<span class="pc bpc" id="L466" title="1 of 2 branches missed.">			if(rs.next()) {</span>
+<span class="fc" id="L467">				return true;</span>
+			}
+
+
+<span class="fc" id="L471">		}catch(SQLException e) {</span>
+<span class="fc" id="L472">			System.out.println(e.toString());</span>
+<span class="nc" id="L473">		}</span>
+<span class="fc" id="L474">		return false;</span>
+	}
+	
+	/**
+	* FEATURE 3
+	* Searching shall be done in more accurate way by adding up budget, location and time as attribute. (e.g. keyword search a tour in Shanghai from now to 2018-11-11 for 40000)
+	* @param text This is a parameter to take the complete sentence that client inputted. 
+	* @return String This returns of the reply message.
+	*/
+	public String searchByKeywords(String input) throws Exception {
+<span class="fc" id="L484">		String output=&quot;&quot;;</span>
+<span class="fc bfc" id="L485" title="All 8 branches covered.">		if ((input.toLowerCase().contains(&quot;in &quot;) || input.toLowerCase().contains(&quot;for &quot;) || input.toLowerCase().contains(&quot;from &quot;))==false){</span>
+<span class="fc" id="L486">			return &quot;Sorry but your input format was invalid~&quot;;</span>
+		}
+		try{
+<span class="fc" id="L489">			Connection connection = null;</span>
+<span class="fc" id="L490">			PreparedStatement stmt = null;</span>
+<span class="fc" id="L491">			ResultSet rs = null; </span>
+<span class="fc" id="L492">			connection = getConnection();</span>
+<span class="fc" id="L493">			String keywords=&quot;Keywords: &quot;;</span>
+<span class="fc" id="L494">			boolean locationFlag = false, timeFlag = false, budgetFlag = false;</span>
+<span class="fc" id="L495">			ArrayList&lt;String&gt; tripList = new ArrayList&lt;String&gt;();</span>
+		//LOCATION searching
+<span class="fc" id="L497">			ArrayList&lt;String&gt; placeList = new ArrayList&lt;String&gt;();</span>
+<span class="fc bfc" id="L498" title="All 2 branches covered.">			if (input.toLowerCase().contains(&quot;in &quot;)) {</span>
+<span class="fc" id="L499">				int startInt = input.toLowerCase().indexOf(&quot;in &quot;)+3;</span>
+<span class="fc" id="L500">				int endInt = input.toLowerCase().indexOf(&quot; &quot;, startInt);</span>
+<span class="fc" id="L501">				String target=&quot;&quot;;</span>
+<span class="pc bpc" id="L502" title="1 of 2 branches missed.">				if (endInt==-1) {</span>
+<span class="fc" id="L503">					target = input.toLowerCase().substring(startInt);</span>
+				}else {
+<span class="nc" id="L505">					target = input.toLowerCase().substring(startInt,endInt);</span>
+				}	
+<span class="fc" id="L507">				keywords += target.toLowerCase()+&quot;, &quot;;</span>
+				//Get Different Location from DB
+<span class="fc" id="L509">				ArrayList&lt;String&gt; Locations = new ArrayList&lt;String&gt;();</span>
+<span class="fc" id="L510">				stmt = connection.prepareStatement(&quot;SELECT DISTINCT location FROM tour&quot;);</span>
+<span class="fc" id="L511">				rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L512" title="All 2 branches covered.">				while(rs.next()) {</span>
+<span class="fc" id="L513">					Locations.add( rs.getString(1) );</span>
+				}
+				//Search the keyword and get related tripname
+<span class="fc bfc" id="L516" title="All 2 branches covered.">				for (int i=0;i&lt;Locations.size();i++) {</span>
+<span class="fc bfc" id="L517" title="All 2 branches covered.">					if (target.toLowerCase().contains(Locations.get(i).toLowerCase())) {</span>
+						//Get related tour from DB
+<span class="fc" id="L519">						stmt = connection.prepareStatement(&quot;SELECT tid FROM tour WHERE location = ? &quot;);</span>
+<span class="fc" id="L520">						stmt.setString(1, Locations.get(i));</span>
+<span class="fc" id="L521">						rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L522" title="All 2 branches covered.">						while(rs.next()) {</span>
+<span class="fc" id="L523">							placeList.add( rs.getString(1) );</span>
+						}
+<span class="fc" id="L525">						locationFlag = true;</span>
+					}
+				}
+			}
+		//TIME searching 
+<span class="fc" id="L530">			ArrayList&lt;String&gt; timeList = new ArrayList&lt;String&gt;();</span>
+<span class="fc" id="L531">			int fromInt=-1; int toInt=-1;</span>
+<span class="fc" id="L532">			fromInt = input.toLowerCase().indexOf(&quot;from &quot;);</span>
+<span class="fc" id="L533">			toInt = input.toLowerCase().indexOf(&quot;to &quot;);</span>
+<span class="fc" id="L534">			String fromDate=&quot;&quot;;</span>
+<span class="fc bfc" id="L535" title="All 2 branches covered.">			if (fromInt!=-1) {</span>
+<span class="fc" id="L536">				fromInt += 5;</span>
+<span class="fc bfc" id="L537" title="All 2 branches covered.">				if (input.substring(fromInt, fromInt+3).equals(&quot;now&quot;)) {</span>
+<span class="fc" id="L538">					fromDate = new SimpleDateFormat(&quot;yyyy-MM-dd&quot;).format(new Date());</span>
+				}else {
+<span class="fc" id="L540">					fromDate = input.substring(fromInt);</span>
+<span class="fc bfc" id="L541" title="All 2 branches covered.">					if (fromDate.length()&gt;=10) {</span>
+<span class="fc" id="L542">						fromDate = fromDate.substring(0,10);</span>
+					}
+<span class="pc bpc" id="L544" title="1 of 4 branches missed.">					if (fromDate.contains(&quot; &quot;) || fromDate.length()&lt;10) {</span>
+<span class="fc" id="L545">						int tempI = fromDate.indexOf(&quot;-&quot;)+1;</span>
+<span class="pc bpc" id="L546" title="1 of 2 branches missed.">						if (fromDate.substring(tempI,tempI+2).contains(&quot;-&quot;)){</span>
+<span class="nc" id="L547">							String startFromDate = fromDate.substring(0,tempI);</span>
+<span class="nc" id="L548">							String endFromDate = null;</span>
+<span class="nc bnc" id="L549" title="All 2 branches missed.">							if (fromDate.length()&gt;=9)</span>
+<span class="nc" id="L550">								endFromDate= fromDate.substring(tempI,fromDate.length()-1);</span>
+							else 
+<span class="nc" id="L552">								endFromDate= fromDate.substring(tempI,fromDate.length());</span>
+<span class="nc" id="L553">							fromDate = startFromDate +&quot;0&quot;+ endFromDate;</span>
+						}
+<span class="fc" id="L555">						tempI = 8;</span>
+<span class="pc bpc" id="L556" title="1 of 2 branches missed.">						if (fromDate.length()&gt;=10) {</span>
+<span class="nc bnc" id="L557" title="All 2 branches missed.">							if (fromDate.substring(tempI,tempI+2).contains(&quot; &quot;)){</span>
+<span class="nc" id="L558">								String startFromDate = fromDate.substring(0,tempI);</span>
+<span class="nc" id="L559">								String endFromDate = fromDate.substring(tempI,fromDate.length()-1);</span>
+<span class="nc" id="L560">								fromDate = startFromDate +&quot;0&quot;+ endFromDate;</span>
+<span class="nc" id="L561">							}</span>
+						}else{
+<span class="fc" id="L563">							String startFromDate = fromDate.substring(0,tempI);</span>
+<span class="fc" id="L564">							String endFromDate = fromDate.substring(tempI);</span>
+<span class="fc" id="L565">							fromDate = startFromDate +&quot;0&quot;+ endFromDate;</span>
+						}
+					}
+<span class="fc" id="L568">					keywords += fromDate+&quot;, &quot;;</span>
+				}
+<span class="fc bfc" id="L570" title="All 2 branches covered.">				if (toInt!=-1) {</span>
+<span class="fc" id="L571">					toInt += 3;</span>
+<span class="fc" id="L572">					String toDate = input.substring(toInt);</span>
+<span class="pc bpc" id="L573" title="1 of 2 branches missed.">					if (toDate.length()&gt;=10)</span>
+<span class="nc" id="L574">						toDate=toDate.substring(0,11);</span>
+<span class="nc bnc" id="L575" title="All 2 branches missed.">					if (input.substring(toInt, toInt+3).equals(&quot;now&quot;)) {</span>
+<span class="nc" id="L576">						toDate = new SimpleDateFormat(&quot;yyyy-MM-dd&quot;).format(new Date());</span>
+					}else {
+<span class="nc" id="L578">						toDate = input.substring(toInt);</span>
+<span class="nc bnc" id="L579" title="All 2 branches missed.">						if (toDate.length()&gt;=10) {</span>
+<span class="nc" id="L580">							toDate = toDate.substring(0,10);</span>
+						}
+<span class="nc bnc" id="L582" title="All 4 branches missed.">						if (toDate.contains(&quot; &quot;) || toDate.length()&lt;10) {</span>
+<span class="nc" id="L583">							int tempI = toDate.indexOf(&quot;-&quot;)+1;</span>
+<span class="nc bnc" id="L584" title="All 2 branches missed.">							if (toDate.substring(tempI,tempI+2).contains(&quot;-&quot;)){</span>
+<span class="nc" id="L585">								String starttoDate = toDate.substring(0,tempI);</span>
+<span class="nc" id="L586">								String endtoDate = null;</span>
+<span class="nc bnc" id="L587" title="All 2 branches missed.">								if (toDate.length()&gt;=9)</span>
+<span class="nc" id="L588">									endtoDate= toDate.substring(tempI,toDate.length()-1);</span>
+								else 
+<span class="nc" id="L590">									endtoDate= toDate.substring(tempI,toDate.length());</span>
+<span class="nc" id="L591">								toDate = starttoDate +&quot;0&quot;+ endtoDate;</span>
+							}
+<span class="nc" id="L593">							tempI = 8;</span>
+<span class="nc bnc" id="L594" title="All 2 branches missed.">							if (toDate.length()&gt;=10) {</span>
+<span class="nc bnc" id="L595" title="All 2 branches missed.">								if (toDate.substring(tempI,tempI+2).contains(&quot; &quot;)){</span>
+<span class="nc" id="L596">									String starttoDate = toDate.substring(0,tempI);</span>
+<span class="nc" id="L597">									String endtoDate = toDate.substring(tempI,toDate.length()-1);</span>
+<span class="nc" id="L598">									toDate = starttoDate +&quot;0&quot;+ endtoDate;</span>
+<span class="nc" id="L599">								}</span>
+							}else{
+<span class="nc" id="L601">								String starttoDate = toDate.substring(0,tempI);</span>
+<span class="nc" id="L602">								String endtoDate = toDate.substring(tempI);</span>
+<span class="nc" id="L603">								toDate = starttoDate +&quot;0&quot;+ endtoDate;</span>
+							}
+						}
+<span class="nc" id="L606">						keywords += toDate+&quot;, &quot;;</span>
+					}
+<span class="nc" id="L608">					String tempStmt = &quot;SELECT tid FROM tour WHERE date_start &gt;= date(?) AND date_start &lt;= date(?) &quot;;</span>
+<span class="nc" id="L609">					stmt = connection.prepareStatement(tempStmt);</span>
+<span class="nc" id="L610">					stmt.setString(1, fromDate.replace(&quot;-&quot;, &quot;&quot;) );</span>
+<span class="nc" id="L611">					stmt.setString(2, toDate.replace(&quot;-&quot;, &quot;&quot;) );</span>
+<span class="nc" id="L612">				}</span>
+				else {
+<span class="fc" id="L614">					stmt = connection.prepareStatement(&quot;SELECT tid FROM tour WHERE date_start &gt;= date(?) &quot;);</span>
+<span class="fc" id="L615">					stmt.setString(1, fromDate.replace(&quot;-&quot;, &quot;&quot;) );</span>
+				}
+<span class="fc" id="L617">				rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L618" title="All 2 branches covered.">				while(rs.next()) {</span>
+<span class="fc" id="L619">					timeList.add( rs.getString(1) );</span>
+				}
+<span class="fc" id="L621">				timeFlag = true;</span>
+			}
+		//BUDGET searching
+<span class="fc" id="L624">			ArrayList&lt;String&gt; budgetList = new ArrayList&lt;String&gt;();</span>
+<span class="fc bfc" id="L625" title="All 2 branches covered.">			if (input.toLowerCase().contains(&quot;for &quot;)) {</span>
+<span class="fc" id="L626">				int startInt = input.toLowerCase().indexOf(&quot;for &quot;)+4;</span>
+<span class="fc" id="L627">				int endInt = input.toLowerCase().indexOf(&quot; &quot;, startInt);</span>
+<span class="pc bpc" id="L628" title="1 of 2 branches missed.">				if (endInt==-1) {</span>
+<span class="fc" id="L629">					stmt = connection.prepareStatement(&quot;SELECT tid FROM tour WHERE tourfee &lt;= &quot;+input.toLowerCase().substring(startInt));</span>
+<span class="fc" id="L630">					keywords += input.toLowerCase().substring(startInt)+&quot;, &quot;;</span>
+				}else {
+<span class="nc" id="L632">					stmt = connection.prepareStatement(&quot;SELECT tid FROM tour WHERE tourfee &lt;= &quot;+input.toLowerCase().substring(startInt,endInt));</span>
+<span class="nc" id="L633">					keywords += input.toLowerCase().substring(startInt,endInt)+&quot;, &quot;;</span>
+				}
+//				stmt.setString( 1, input.toLowerCase().substring(input.toLowerCase().indexOf(&quot;for&quot;)+4) );
+<span class="nc" id="L636">				rs = stmt.executeQuery();</span>
+<span class="nc bnc" id="L637" title="All 2 branches missed.">				while(rs.next()) {</span>
+<span class="nc" id="L638">					budgetList.add( rs.getString(1) );</span>
+				}
+<span class="nc" id="L640">				budgetFlag = true;</span>
+			}
+			//Generate result from the three types of keyword searching
+<span class="fc bfc" id="L643" title="All 2 branches covered.">			if (locationFlag) {</span>
+<span class="pc bpc" id="L644" title="1 of 2 branches missed.">				if (timeFlag) {</span>
+<span class="nc bnc" id="L645" title="All 2 branches missed.">					if(budgetFlag){timeList.retainAll(budgetList);placeList.retainAll(timeList);}</span>
+<span class="nc" id="L646">					else{placeList.retainAll(timeList);}</span>
+<span class="nc" id="L647">					tripList = placeList;</span>
+				}else {
+<span class="pc bpc" id="L649" title="1 of 2 branches missed.">					if(budgetFlag){placeList.retainAll(budgetList);}</span>
+<span class="fc" id="L650">					tripList = placeList;</span>
+				}
+			}else {
+<span class="pc bpc" id="L653" title="1 of 2 branches missed.">				if (timeFlag) {</span>
+<span class="pc bpc" id="L654" title="1 of 2 branches missed.">					if(budgetFlag){timeList.retainAll(budgetList);}</span>
+<span class="fc" id="L655">					tripList = timeList;</span>
+				}else {
+<span class="nc bnc" id="L657" title="All 2 branches missed.">					if(budgetFlag){tripList = budgetList;}</span>
+				}
+			}
+<span class="fc" id="L660">			ArrayList&lt;String&gt; outputList = new ArrayList&lt;String&gt;();</span>
+<span class="fc bfc" id="L661" title="All 2 branches covered.">			for (int i=0;i&lt;tripList.size();i++) {</span>
+<span class="fc" id="L662">				stmt = connection.prepareStatement(&quot;SELECT tourname FROM tour WHERE tid = ?&quot;);</span>
+<span class="fc" id="L663">				stmt.setString(1, tripList.get(i) );</span>
+<span class="fc" id="L664">				rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L665" title="All 2 branches covered.">				while(rs.next()) {</span>
+<span class="fc" id="L666">					outputList.add( rs.getString(1) );</span>
+				}
+			}
+<span class="fc" id="L669">			output = keywords.substring(0, keywords.length()-2) +&quot;\n\n&quot;;</span>
+<span class="pc bpc" id="L670" title="1 of 2 branches missed.">			if (outputList.isEmpty()) {</span>
+<span class="nc" id="L671">				output+=&quot;Oops, no related result found. \n\n&quot;;</span>
+<span class="nc" id="L672">				output+=recommendation(input);</span>
+<span class="fc bfc" id="L673" title="All 2 branches covered.">			}else if(outputList.size()==1){</span>
+<span class="fc" id="L674">				output+=&quot;This trip maybe good for you: \n&quot;;</span>
+<span class="fc" id="L675">				output += &quot;1. &quot; + outputList.get(0) + &quot;\n&quot;;</span>
+			}else{
+<span class="fc" id="L677">				output+=&quot;These trips maybe good for you: \n&quot;;</span>
+<span class="fc bfc" id="L678" title="All 2 branches covered.">				for (int i=0;i&lt;outputList.size();i++) {</span>
+<span class="fc" id="L679">					output += Integer.toString(i+1) +&quot;. &quot; + outputList.get(i) + &quot;\n&quot;;</span>
+				}
+			}
+<span class="fc" id="L682">			rs.close();</span>
+<span class="fc" id="L683">			stmt.close();</span>
+<span class="fc" id="L684">			connection.close();</span>
+<span class="fc" id="L685">		} catch (Exception e) {</span>
+//			log.info(&quot;Exception: &quot;, e.toString());
+//			output = e.toString();
+<span class="fc" id="L688">			return &quot;Sorry but your input format was invalid~&quot;;</span>
+<span class="nc" id="L689">		} finally { </span>
+<span class="fc" id="L690">		}</span>
+<span class="fc" id="L691">		return output;</span>
+	}
+
+    
+	/**
+	 * search the status in difference case
+	 * 
+	 * @param text is the text that user input
+	 * @param name is the name that user 's LINE ID
+	 * @return the string output
+	 * @throws Exception is the exception that we have
+	 */
+	
+	
+	@Override
+	public String search(String text,String name) throws Exception {
+		
+<span class="fc" id="L708">		String result = null;</span>
+<span class="fc" id="L709">		Connection connection = null;</span>
+<span class="fc" id="L710">		PreparedStatement stmt = null;</span>
+		String keyword;
+		String response;
+<span class="fc" id="L713">		ResultSet rs = null;</span>
+		// don 't know why don 't go in test case. test testtest
+		
+		try {
+<span class="fc" id="L717">			connection = getConnection();</span>
+		}
+<span class="nc" id="L719">		catch (URISyntaxException e1) {</span>
+<span class="nc" id="L720">			log.info(&quot;URISyntaxException while closing file: {}&quot;, e1.toString());</span>
+		}
+<span class="fc" id="L722">		catch (SQLException e2) {</span>
+<span class="fc" id="L723">			log.info(&quot;URISyntaxException while closing file: {}&quot;, e2.toString());</span>
+<span class="pc" id="L724">		}</span>
+		
+		try {
+			//FAQ Enquiry
+<span class="fc" id="L728">			FAQ faq = FAQ.getFAQ(stmt, connection);</span>
+<span class="fc" id="L729">			result = faq.enquiry(text);</span>
+			
+<span class="fc bfc" id="L731" title="All 2 branches covered.">	          if(text.toLowerCase().contains(&quot;tourstatus&quot;)) {</span>
+	        	     // this is a Method for keep track user 's tours status
+	        	     // and notAll() would used in the future since the once the user
+	        	     // implements his datum and it would run update.
+	        	     // but now it might not needed.
+	        	     // and it only provided real time update when running.
+	        	     // difference from the notice function that used by tour guide
+	        	  
+	          	//Tourist tmp = new Tourist(&quot;tschiuaa&quot;,0);  // the most impt,we are going to find tschiuaa 's tourstatus
+<span class="fc" id="L740">	           	StatusName status = new StatusName(&quot;hotspringtrip&quot;); // string inside constructor is uselss for this case , but very useful in implementation parts</span>
+	           	//status.notAll(); // this is not have its use complete until the implementation part finish
+<span class="fc" id="L742">	           	result = &quot;\n******Here are your tour Status****** \n\n&quot;;</span>
+<span class="fc" id="L743">	           	result += &quot;@ Remark : Introduction and Review from tourists shall be shown once customer selected a tour (Fulfilled req 3.2.)\n&quot;;</span>
+<span class="fc" id="L744">	           	result += &quot;@ Remark2: So the result is not finalised since some customers are not paid, but review just given them to have a look whether they hold the positions in trips.\n&quot;;</span>
+<span class="pc bpc" id="L745" title="1 of 2 branches missed.">	           	for(int i = 0 ; i &lt; status.getSizeOfTripNum(tmp) ;i++)</span>
+	            {
+<span class="nc" id="L747">	            result += status.CheckStatus(tmp,i); // check status Method</span>
+	            }
+	          }
+	           	
+<span class="fc bfc" id="L751" title="All 2 branches covered.">		        if(text.toLowerCase().contains(&quot;balance&quot;))</span>
+		        {
+		        //	Tourist tmp = new Tourist(&quot;tschiuaa&quot;,0); 
+		        	// this is part that keep track about pricing of each tours that users should paid
+	 		    //tmp = new Tourist(&quot;tschiuaa&quot;,0); 
+<span class="fc" id="L756">	 			PriceCalculate pc = new PriceCalculate(tmp);   </span>
+<span class="fc" id="L757">	 			result = &quot;\n******Here are your tour record****** \n&quot;;</span>
+<span class="fc" id="L758">	 			result += &quot;@Remark : The tour, traffic and any other fee, and the total price shall be echoed eventually.(Fulfilled req 4.) \n&quot;;</span>
+<span class="pc bpc" id="L759" title="1 of 2 branches missed.">	 			for(int i = 0 ; i &lt;  pc.getSizeOfCustomer() ; i++) {</span>
+<span class="nc" id="L760">	 				result += pc.getDescription(i);</span>
+	 			}
+		        }
+	        
+		}
+<span class="nc" id="L765">		catch (SQLException e3) {</span>
+<span class="nc" id="L766">			log.info(&quot;SQLException while closing file: {}&quot;, e3.toString());</span>
+		}
+		
+		finally {
+<span class="fc" id="L770">			try {</span>
+<span class="pc bpc" id="L771" title="4 of 6 branches missed.">				if(rs!=null)</span>
+<span class="nc" id="L772">					rs.close();</span>
+<span class="pc bpc" id="L773" title="4 of 6 branches missed.">				if(stmt!=null)</span>
+<span class="nc" id="L774">					stmt.close();</span>
+<span class="pc bpc" id="L775" title="3 of 6 branches missed.">				if(connection!=null)</span>
+<span class="pc" id="L776">					connection.close();</span>
+			}
+<span class="nc" id="L778">			catch (SQLException e4) {</span>
+<span class="nc" id="L779">				log.info(&quot;SQLException while closing file: {}&quot;, e4.toString());</span>
+<span class="pc" id="L780">			}</span>
+<span class="nc" id="L781">		}</span>
+		
+<span class="pc bpc" id="L783" title="1 of 2 branches missed.">		if (result != null) {</span>
+<span class="fc" id="L784">			return result;</span>
+		}else {
+<span class="nc" id="L786">			return &quot;Sorry, we don't have answer for this.&quot;;</span>
+		}
+
+//		throw new Exception(&quot;NOT FOUND&quot;);
+	}
+	
+	/**
+	 * 
+	 * get connection 
+	 * 
+	 * @return connection status
+	 * @throws URISyntaxException excpetion of url case
+	 * @throws SQLException sql exception of the case
+	 */
+	
+	private Connection getConnection() throws URISyntaxException, SQLException {
+		Connection connection;
+<span class="fc" id="L803">		URI dbUri = new URI(&quot;postgres://itniqlvmjieeeq:1bf7632721043bf02f0f498974ece3939ed3e947b9c96435ca0ced9d06593f33@ec2-107-22-235-167.compute-1.amazonaws.com:5432/daj5i9364g5dfv&quot;);</span>
+<span class="fc" id="L804">		String username = dbUri.getUserInfo().split(&quot;:&quot;)[0];</span>
+<span class="fc" id="L805">		String password = dbUri.getUserInfo().split(&quot;:&quot;)[1];</span>
+<span class="fc" id="L806">		String dbUrl = &quot;jdbc:postgresql://&quot; + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath() +  &quot;?ssl=true&amp;sslfactory=org.postgresql.ssl.NonValidatingFactory&quot;;</span>
+
+<span class="fc" id="L808">		log.info(&quot;Username: {} Password: {}&quot;, username, password);</span>
+<span class="fc" id="L809">		log.info (&quot;dbUrl: {}&quot;, dbUrl);</span>
+		
+//		URI dbUri = new URI(System.getenv(&quot;postgres://itniqlvmjieeeq:1bf7632721043bf02f0f498974ece3939ed3e947b9c96435ca0ced9d06593f33@ec2-107-22-235-167.compute-1.amazonaws.com:5432/daj5i9364g5dfv&quot;));
+//
+//		String username = itniqlvmjieeeq;
+//		String password = 1bf7632721043bf02f0f498974ece3939ed3e947b9c96435ca0ced9d06593f33;
+//		String dbUrl = &quot;jdbc:postgresql://&quot; + dbUri.getHost() + ':' + '5432' + dbUri.getPath() +  &quot;?ssl=true&amp;sslfactory=org.postgresql.ssl.NonValidatingFactory&quot;;
+//
+//		log.info(&quot;Username: {} Password: {}&quot;, username, password);
+//		log.info (&quot;dbUrl: {}&quot;, dbUrl);
+		
+<span class="fc" id="L820">		connection = DriverManager.getConnection(dbUrl, username, password);</span>
+
+<span class="fc" id="L822">		return connection;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

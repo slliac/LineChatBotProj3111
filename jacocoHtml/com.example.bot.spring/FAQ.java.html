@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FAQ.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">sample-spring-boot-kitchensink</a> &gt; <a href="index.source.html" class="el_package">com.example.bot.spring</a> &gt; <span class="el_source">FAQ.java</span></div><h1>FAQ.java</h1><pre class="source lang-java linenums">package com.example.bot.spring;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+/** 
+ * FAQ Enquiry: Thread-safe Singleton Design Pattern + modified Strategy Design Pattern
+ * - Singleton pattern is used as only 1 FAQ object can be instantiated
+ * - Strategy pattern is used as 2 types of FAQ querying methods are implemented:
+ * 	- 1. Direct Search: searching the database once only
+ * 	- 2. Double Search: the first search of the database retrieves the response template from the database &quot;faq&quot;,
+ * 						the second search of the database retrieves the actual values stored from the other database &quot;companyinfo&quot;
+ * 	- 3. Not Available Search: search the database and return same batch of &quot;not support&quot; response
+ * ***Remark: setting the query behaviour (qBehaviour) inside all the newly added new method!!!***
+*/
+public class FAQ {
+	/**
+	 * the only KEYWORDS that can be searched by the user
+	 */
+<span class="fc" id="L21">	private static final String[] DIRECT_KEYWORDS = {</span>
+			&quot;assembly point&quot;, &quot;transportation&quot;, &quot;contact&quot;, 
+			&quot;visa&quot;, &quot;swimming suit&quot;, &quot;vegetarian&quot;, &quot;late departure date&quot;
+	};
+<span class="fc" id="L25">	private static final String[] DOUBLE_KEYWORDS = {</span>
+			&quot;apply&quot;, &quot;tour cancelled&quot;, &quot;additional charge&quot;, 
+			&quot;insurance&quot;, &quot;hotel bed&quot;, &quot;tour fee&quot;, 
+
+			//extraFAQ
+			&quot;deadline&quot;, &quot;tour size&quot;
+	};
+<span class="fc" id="L32">	private static final String[] NOT_AVAILABLE_KEYWORDS = {</span>
+			//these Keywords searched will return the same result, i.e. not available:
+			//air ticket and trip||waiting list||language support
+			&quot;air ticket and trip&quot;, &quot;waiting list&quot;, &quot;language support&quot;
+	};
+	
+	//unique instance
+<span class="fc" id="L39">	private static FAQ faq = new FAQ();</span>
+	
+	//instance variable
+	private static PreparedStatement stmt;
+	private static Connection connection;
+	private QueryBehaviour qBehaviour;
+<span class="fc" id="L45">	private String result = null;</span>
+	
+<span class="fc" id="L47">	private FAQ() {;}</span>
+	
+	// return the unique FAQ object
+	public static FAQ getFAQ (PreparedStatement p, Connection c)
+	{
+<span class="fc" id="L52">		stmt = p;</span>
+<span class="fc" id="L53">		connection = c;</span>
+<span class="fc" id="L54">		return faq;</span>
+	}
+	
+	/**
+	 * return a String of the selected KEYWORDS which are separated with a space
+	 * @param notAvailable
+	 * 		-	true: 	ONLY search the NOT_AVAILABLE_KEYWORDS keywords
+	 * 		-	false: 	DIRECT_KEYWORDS / DOUBLE_KEYWORDS
+	 * @param direct
+	 * 		-	true: 	ONLY search the DIRECT_KEYWORDS keywords (pre-condition: notAvailabe == false)
+	 * 		- 	false: 	ONLY search the DOUBLE_KEYWORDS keywords (pre-condition: notAvailabe == false)
+	 * @return temp
+	 */
+	public String getKeywords(boolean notAvailable, boolean direct)
+	{
+<span class="fc" id="L69">		String[] tempKeywords = null;</span>
+<span class="fc" id="L70">		String temp = &quot;&quot;;</span>
+<span class="fc" id="L71">		int i = 0;</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">		if (notAvailable)</span>
+<span class="fc" id="L73">			tempKeywords = NOT_AVAILABLE_KEYWORDS;</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">		else if (direct)</span>
+<span class="fc" id="L75">			tempKeywords = DIRECT_KEYWORDS;</span>
+		else
+<span class="fc" id="L77">			tempKeywords = DOUBLE_KEYWORDS;</span>
+			
+<span class="fc bfc" id="L79" title="All 2 branches covered.">		for (String k: tempKeywords)</span>
+		{
+<span class="fc" id="L81">			temp += k;</span>
+<span class="fc" id="L82">			++i;</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">			if (i &lt; tempKeywords.length)</span>
+<span class="fc" id="L84">				temp += &quot; &quot;;</span>
+		}
+<span class="fc" id="L86">		return temp;</span>
+	}
+	
+	public void setQuery(QueryBehaviour qb)
+	{
+<span class="fc" id="L91">		qBehaviour = qb;</span>
+<span class="fc" id="L92">	}</span>
+	
+	public String enquiry(String text) throws SQLException
+	{
+<span class="fc" id="L96">		boolean direct = false;</span>
+<span class="fc" id="L97">		boolean found = false;</span>
+		
+<span class="fc bfc" id="L99" title="All 2 branches covered.">		for (String k: DIRECT_KEYWORDS)</span>
+		{
+<span class="fc bfc" id="L101" title="All 2 branches covered.">			if (text.toLowerCase().contains(k))</span>
+			{
+<span class="fc" id="L103">				qBehaviour = new FAQQueryWithDirectSearch();</span>
+<span class="fc" id="L104">				result = qBehaviour.query(stmt, connection, text, result);</span>
+<span class="fc" id="L105">				direct = true;</span>
+<span class="fc" id="L106">				found = true;</span>
+<span class="fc" id="L107">				break;</span>
+			}
+		}
+		
+<span class="fc bfc" id="L111" title="All 2 branches covered.">		if (!direct)</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">			for (String k: DOUBLE_KEYWORDS)</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">				if (text.toLowerCase().contains(k))</span>
+				{
+<span class="fc" id="L115">					qBehaviour = new FAQQueryWithDirectSearch();</span>
+<span class="fc" id="L116">					result = qBehaviour.query(stmt, connection, text, result);</span>
+<span class="fc" id="L117">					qBehaviour = new FAQQueryWithDoubleSearch();</span>
+<span class="fc" id="L118">					result = qBehaviour.query(stmt, connection, text, result);</span>
+<span class="fc" id="L119">					found = true;</span>
+<span class="fc" id="L120">					break;</span>
+				}
+		
+<span class="fc bfc" id="L123" title="All 2 branches covered.">		for (String k: NOT_AVAILABLE_KEYWORDS)</span>
+		{
+<span class="fc bfc" id="L125" title="All 2 branches covered.">			if (text.toLowerCase().contains(k))</span>
+			{
+<span class="fc" id="L127">				qBehaviour = new FAQQueryNotAvailable();</span>
+<span class="fc" id="L128">				result = qBehaviour.query(stmt, connection, text, result);</span>
+<span class="fc" id="L129">				found = true;</span>
+<span class="fc" id="L130">				break;</span>
+			}
+		}
+
+<span class="fc bfc" id="L134" title="All 2 branches covered.">		if (found)</span>
+<span class="fc" id="L135">			return result;</span>
+		else
+<span class="fc" id="L137">			return &quot;Sorry, we don't have answer for this.&quot;;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

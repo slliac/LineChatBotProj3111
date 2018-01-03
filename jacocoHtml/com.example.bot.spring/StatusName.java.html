@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatusName.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">sample-spring-boot-kitchensink</a> &gt; <a href="index.source.html" class="el_package">com.example.bot.spring</a> &gt; <span class="el_source">StatusName.java</span></div><h1>StatusName.java</h1><pre class="source lang-java linenums">package com.example.bot.spring;
+import lombok.extern.slf4j.Slf4j;
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
+import java.sql.*;
+import java.net.URISyntaxException;
+import java.net.URI;
+import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+
+<span class="fc" id="L14">@Slf4j</span>
+/**
+ * 
+ * 
+ * Status name 
+ * 
+ * is the status for the search the status of users  
+ * 
+ * @author Gordon
+ * 
+ * 
+ *
+ */
+
+public class StatusName{
+<span class="fc" id="L29">    public KitchenSinkController controller = null;</span>
+<span class="fc" id="L30">	public List&lt;Tourist&gt; tourist = new ArrayList&lt;Tourist&gt;(); // Object for Tourist</span>
+<span class="fc" id="L31">	public List&lt;String&gt;  tourName = new ArrayList&lt;String&gt;(); // Tourist name</span>
+<span class="fc" id="L32">	public List&lt;String&gt;  tripName = new ArrayList&lt;String&gt;(); // your trip Name</span>
+<span class="fc" id="L33">	public List&lt;String&gt;  tripStatus = new ArrayList&lt;String&gt;(); // your trip Status</span>
+<span class="fc" id="L34">	public List&lt;Integer&gt; numOfChildList = new ArrayList&lt;Integer&gt;(); // keep track about the number of child per customer</span>
+<span class="fc" id="L35">	public List&lt;Integer&gt; numOfAdultList = new ArrayList&lt;Integer&gt;(); // keep track about the number of child per customer</span>
+<span class="fc" id="L36">	public List&lt;Integer&gt; numOftoodlerist = new ArrayList&lt;Integer&gt;(); </span>
+<span class="fc" id="L37">	public List&lt;Integer&gt; CnumOfChildList = new ArrayList&lt;Integer&gt;(); // keep track about the number of child per customer</span>
+<span class="fc" id="L38">	public List&lt;Integer&gt; CnumOfAdultList = new ArrayList&lt;Integer&gt;(); // keep track about the number of child per customer</span>
+<span class="fc" id="L39">	public List&lt;Integer&gt; CnumOftoodlerist = new ArrayList&lt;Integer&gt;(); </span>
+<span class="fc" id="L40">	public List&lt;Integer&gt; tripNumList = new ArrayList&lt;Integer&gt;(); </span>
+	public List&lt;String&gt; trip2;
+<span class="fc" id="L42">    public List&lt;Integer&gt; tripPrice2  = new ArrayList&lt;Integer&gt;();</span>
+<span class="fc" id="L43">    public List&lt;Integer&gt; paidPrice2  = new ArrayList&lt;Integer&gt;();</span>
+    
+<span class="fc" id="L45">    public List&lt;String&gt;  ccID  = new ArrayList&lt;String&gt;(); </span>
+<span class="fc" id="L46">    public List&lt;String&gt;  ccIDN  = new ArrayList&lt;String&gt;(); </span>
+<span class="fc" id="L47">    public List&lt;String&gt;  NccID  = new ArrayList&lt;String&gt;(); </span>
+<span class="fc" id="L48">    public List&lt;String&gt;  NccIDN  = new ArrayList&lt;String&gt;(); </span>
+<span class="fc" id="L49">    public List&lt;String&gt;  idtest  = new ArrayList&lt;String&gt;(); </span>
+<span class="fc" id="L50">    public List&lt;String&gt;  idtest2  = new ArrayList&lt;String&gt;(); </span>
+<span class="fc" id="L51">    public List&lt;String&gt;  ConfirmedCustomer = new ArrayList&lt;String&gt;(); </span>
+<span class="fc" id="L52">    public List&lt;String&gt;  ConfirmedCustomerNE = new ArrayList&lt;String&gt;(); </span>
+<span class="fc" id="L53">    public List&lt;String&gt;  NConfirmedCustomerNE = new ArrayList&lt;String&gt;(); </span>
+<span class="fc" id="L54">    public List&lt;String&gt;  NConfirmedCustomer = new ArrayList&lt;String&gt;(); </span>
+<span class="fc" id="L55">    public List&lt;Tourist&gt; confirmedto = new ArrayList&lt;Tourist&gt;();</span>
+<span class="fc" id="L56">    public List&lt;Tourist&gt; unpaidto = new ArrayList&lt;Tourist&gt;();</span>
+	//public String tripName = null;
+	public Tourist tmp ;
+	public String [] tmpString;
+	public String tn; 
+<span class="fc" id="L61">	public List&lt;Integer&gt; tripStatus2 = new ArrayList&lt;Integer&gt;();</span>
+<span class="fc" id="L62">	public StatusName() {</span>
+		
+<span class="fc" id="L64">	}</span>
+	
+	/**
+	 * StatusName is searched the status by the trip
+	 * 
+	 * @param trip is the string that we used.
+	 */
+	
+<span class="fc" id="L72">    public StatusName(String trip) {</span>
+<span class="fc" id="L73">	    tn = trip;</span>
+<span class="fc" id="L74">	    trip2 = new ArrayList&lt;String&gt;();</span>
+	try {
+<span class="fc" id="L76">	Connection connection = getConnection2();</span>
+<span class="fc" id="L77">	PreparedStatement stmt = connection.prepareStatement(&quot;SELECT name,tripstatus,childnum,adultnum,toodlernum from TourInf WHERE tripname like '%'||?||'%'&quot;);</span>
+<span class="fc" id="L78">	stmt.setString(1,tn);</span>
+<span class="fc" id="L79">    ResultSet rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">    while (rs.next()){</span>
+<span class="fc" id="L81">    	tourName.add(rs.getString(&quot;name&quot;));</span>
+<span class="fc" id="L82">    	tripStatus.add(Integer.toString(rs.getInt(&quot;tripstatus&quot;)));</span>
+<span class="fc" id="L83">    	numOfChildList.add(rs.getInt(&quot;childnum&quot;));</span>
+<span class="fc" id="L84">    	numOfAdultList.add(rs.getInt(&quot;adultnum&quot;));</span>
+<span class="fc" id="L85">    	numOftoodlerist.add(rs.getInt(&quot;toodlernum&quot;));</span>
+    }
+<span class="fc" id="L87">    rs.close();</span>
+<span class="fc" id="L88">    stmt.close();</span>
+    
+<span class="fc" id="L90">	PreparedStatement stmt2 = connection.prepareStatement(&quot;SELECT name,tripstatus,childnum,adultnum,toodlernum from TourInf WHERE tripname like '%'||?||'%' and tourfee - amount_paid &lt;= 0  &quot;);</span>
+<span class="fc" id="L91">	stmt2.setString(1,tn);</span>
+<span class="fc" id="L92">    ResultSet rs2 = stmt2.executeQuery();</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">    while (rs2.next()){</span>
+<span class="fc" id="L94">    	CnumOfChildList.add(rs2.getInt(&quot;childnum&quot;));</span>
+<span class="fc" id="L95">    	CnumOfAdultList.add(rs2.getInt(&quot;adultnum&quot;));</span>
+<span class="fc" id="L96">    CnumOftoodlerist.add(rs2.getInt(&quot;toodlernum&quot;));</span>
+    }
+<span class="fc" id="L98">    rs2.close();</span>
+<span class="fc" id="L99">    stmt2.close();</span>
+<span class="fc" id="L100">    connection.close();</span>
+	
+
+	}
+	
+<span class="fc" id="L105">	catch (Exception e) </span>
+	{
+<span class="fc" id="L107">     System.out.println(e);</span>
+<span class="fc" id="L108">    }</span>
+
+	
+<span class="fc bfc" id="L111" title="All 2 branches covered.">    for(int i = 0 ; i &lt; tourName.size()  ; i++) {</span>
+<span class="fc" id="L112">    	tmp = new Tourist(tourName.get(i),Integer.parseInt(tripStatus.get(i))); //Integer.parseInt(tripStatus.get(i))</span>
+<span class="fc" id="L113">    	  	PriceCalculate pc = new PriceCalculate(tmp);		    //	PriceCalculate pc = new PriceCalculate(tmp);</span>
+<span class="fc" id="L114">    	     addTourist(tmp);</span>
+    }
+    
+	
+<span class="fc" id="L118">}</span>
+    
+    /**
+     * People Count for count of the peoplecount for tours
+     * 
+     * @return the number of people count
+     */
+    public int PeopleCount2() {
+    	// Method refactored
+<span class="fc" id="L127">       	int peopleCount = 0;</span>
+    	       	   	
+<span class="fc bfc" id="L129" title="All 2 branches covered.">	    for(int i : CnumOfChildList) {</span>
+<span class="fc" id="L130"> 	    	peopleCount += i;</span>
+<span class="fc" id="L131"> 	    }</span>
+ 	    
+<span class="fc bfc" id="L133" title="All 2 branches covered."> 	    for(int i : CnumOfAdultList) {</span>
+<span class="fc" id="L134"> 	    	peopleCount += i;</span>
+<span class="fc" id="L135"> 	    }</span>
+ 	    
+<span class="fc bfc" id="L137" title="All 2 branches covered."> 	    for(int i : CnumOftoodlerist) {</span>
+<span class="fc" id="L138"> 	    	peopleCount += i;</span>
+<span class="fc" id="L139"> 	    }</span>
+    	
+ 	
+<span class="fc" id="L142"> 	    return peopleCount;</span>
+    }
+    
+    
+	/**
+	 * 
+	 * tripStatus in which status 
+	 * @return the status of trip
+	 */
+    public boolean tripStatus() {
+    	try {
+<span class="fc" id="L153">    		Connection connection = getConnection2();</span>
+<span class="fc" id="L154">    		PreparedStatement stmt = connection.prepareStatement(&quot;SELECT name,tripstatus from TourInf WHERE tripname like '%'||?||'%' &quot;);</span>
+<span class="fc" id="L155">    		stmt.setString(1,tn);</span>
+<span class="fc" id="L156">            ResultSet rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">            while (rs.next()){</span>
+<span class="fc" id="L158">            	tripNumList.add(rs.getInt(&quot;tripstatus&quot;));</span>
+            }
+<span class="fc" id="L160">            rs.close();</span>
+<span class="fc" id="L161">            stmt.close();</span>
+<span class="fc" id="L162">            connection.close();</span>
+            
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">            for(int i : tripNumList) {</span>
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">            	     if(i == 0 ){</span>
+<span class="nc" id="L166">            	    	 return false;</span>
+            	     }else
+<span class="fc" id="L168">            	    	 return true;</span>
+            }
+            
+    		}
+    		
+<span class="fc" id="L173">    		catch (Exception e) </span>
+    		{
+        
+<span class="nc" id="L176">        }</span>
+<span class="fc" id="L177">    return false;</span>
+    }
+    
+    /**
+     * 
+     * remove the tourist from the tourist list
+     * 
+     * @param t is object inside the tourist list
+     */
+    public void RemoveTourist(Tourist t) {
+<span class="nc" id="L187">    	tourist.remove(t);</span>
+<span class="nc" id="L188">    }</span>
+    
+    
+    /**
+     * addTourist 
+     * 
+     * add the tourist inside the tourist list
+     * 
+     * @param t is the object inside the list
+     */
+    public void addTourist(Tourist t) {
+<span class="fc" id="L199">    	tourist.add(t);</span>
+<span class="fc" id="L200">    }</span>
+    public int getSizeOfTripNum(Tourist tourist) {
+    	try {
+<span class="fc" id="L203">    		int number = 0 ; </span>
+<span class="fc" id="L204">    		Connection connection = getConnection2();</span>
+<span class="fc" id="L205">    		PreparedStatement stmt = connection.prepareStatement(&quot;SELECT tripname,tripstatus FROM TourInf where name = ? &quot;);</span>
+<span class="fc" id="L206">    		stmt.setString(1,tourist.getName());</span>
+<span class="fc" id="L207">    		ResultSet rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">    		while(rs.next()) {</span>
+<span class="fc" id="L209">    			number++;</span>
+    		}
+<span class="fc" id="L211">            rs.close();</span>
+<span class="fc" id="L212">            stmt.close();</span>
+<span class="fc" id="L213">            connection.close();</span>
+<span class="fc" id="L214">         return number;</span>
+<span class="fc" id="L215">    		}catch(Exception e) {</span>
+    		
+    		}
+<span class="fc" id="L218">    		return 0;</span>
+    }
+   
+    
+    /**
+     * 
+     * Check status of the tourist.
+     * 
+     * @param tourist is object of tourist
+     * @param index of tourist
+     * @return the string that we wants.
+     */
+    public String CheckStatus(Tourist tourist,int index) {
+		try {
+<span class="fc" id="L232">		Connection connection = getConnection2();</span>
+<span class="fc" id="L233">		PreparedStatement stmt = connection.prepareStatement(&quot;SELECT tourfee,amount_paid,tripname,tripstatus FROM TourInf where name = ? &quot;);</span>
+<span class="fc" id="L234">		stmt.setString(1,tourist.getName());</span>
+<span class="fc" id="L235">		ResultSet rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">		while(rs.next()) {</span>
+<span class="fc" id="L237">			trip2.add(rs.getString(&quot;tripname&quot;));</span>
+<span class="fc" id="L238">			tripStatus2.add(rs.getInt(&quot;tripstatus&quot;));</span>
+<span class="fc" id="L239">           	tripPrice2.add(rs.getInt(&quot;tourfee&quot;));</span>
+<span class="fc" id="L240">           	paidPrice2.add(rs.getInt(&quot;amount_paid&quot;));</span>
+		}
+<span class="fc" id="L242">        rs.close();</span>
+<span class="fc" id="L243">        stmt.close();</span>
+<span class="fc" id="L244">        connection.close();</span>
+        
+<span class="fc" id="L246">        String []description = new String[trip2.size()];</span>
+        //this.notAllConfirmed();
+        //int num = PeopleCount2();
+        // it 's always assume the price show out should
+        // ve difference from priceCalculate
+        // because  didn 't implmented input system.
+        // noted by Gordon 
+        // No error !!!!
+<span class="fc bfc" id="L254" title="All 2 branches covered.">	    for(int i = 0; i &lt; trip2.size() ;i++) {</span>
+<span class="fc" id="L255">    	    description[i] = Integer.toString(i)+ &quot;. &quot;+ trip2.get(i)+&quot;\n&quot; ;</span>
+<span class="pc bpc" id="L256" title="3 of 4 branches missed.">    	    if(tripStatus2.get(i) == 0 &amp;&amp; (tripPrice2.get(i) - paidPrice2.get(i) == 0)) </span>
+<span class="nc" id="L257">    	    	description[i] += &quot;Status of trip : Not yet establish the trip due to smaller than 20 person and you paid. \n\n&quot;; </span>
+<span class="pc bpc" id="L258" title="1 of 4 branches missed.">        if(tripStatus2.get(i) == 1 &amp;&amp; (tripPrice2.get(i) - paidPrice2.get(i) &gt; 0 )) </span>
+<span class="nc" id="L259">	    	description[i] += &quot;Status of trip : Trip Established but you still didn 't paid &quot;+ (tripPrice2.get(i) - paidPrice2.get(i)) + &quot; for this trip.\n\n &quot;;</span>
+<span class="fc bfc" id="L260" title="All 4 branches covered.">    	    if(tripStatus2.get(i) == 2 &amp;&amp; (tripPrice2.get(i) - paidPrice2.get(i) &gt; 0 )) </span>
+<span class="fc" id="L261">    	    	description[i] += &quot;Status of trip : Trip Established and full but you still need to paid &quot;+ (tripPrice2.get(i) - paidPrice2.get(i)) + &quot; for this trip.\n\n&quot;; </span>
+<span class="pc bpc" id="L262" title="1 of 4 branches missed.">    	    if(tripStatus2.get(i) == 1 &amp;&amp; (tripPrice2.get(i) - paidPrice2.get(i) == 0 )) </span>
+<span class="fc" id="L263">	    	description[i] += &quot;Status of trip : Trip Established and you paid.\n\n&quot;; </span>
+<span class="fc bfc" id="L264" title="All 4 branches covered.">    	    if(tripStatus2.get(i) == 2 &amp;&amp; (tripPrice2.get(i) - paidPrice2.get(i) == 0 )) </span>
+<span class="fc" id="L265">    	    	description[i] += &quot;Status of trip : Trip Established and full also you paid. \n\n&quot;; </span>
+<span class="pc bpc" id="L266" title="1 of 4 branches missed.">    	    if(tripStatus2.get(i) == 2 &amp;&amp; (tripPrice2.get(i) - paidPrice2.get(i) &lt; 0 )) </span>
+<span class="nc" id="L267">    	    	description[i] += &quot;Status of trip : Trip Established and full also you paid, we 'll refund to you. \n\n&quot;; </span>
+<span class="pc bpc" id="L268" title="3 of 4 branches missed.">    		if(tripStatus2.get(i) == 0 &amp;&amp; (tripPrice2.get(i) - paidPrice2.get(i) &lt; 0)) </span>
+<span class="nc" id="L269">        description[i] += &quot;Status of trip : Not yet establish the trip due to smaller than 20 person and refund will return to you. \n\n&quot;; </span>
+<span class="pc bpc" id="L270" title="3 of 4 branches missed.">    		if(tripStatus2.get(i) == 0 &amp;&amp; (tripPrice2.get(i) - paidPrice2.get(i) &gt; 0)) </span>
+<span class="nc" id="L271">        	description[i] += &quot;Status of trip : Not yet establish the trip due to smaller than 20 person and you still need to paid &quot;+ (tripPrice2.get(i) - paidPrice2.get(i)) + &quot;for this trip.\n\n&quot;; </span>
+        
+    	    
+	    }
+	    
+<span class="fc" id="L276">		return description[index];</span>
+<span class="nc" id="L277">		}catch(Exception e) {</span>
+		
+		}
+<span class="nc" id="L280">		return &quot;hoho&quot;;</span>
+    }
+    
+	/**
+	 * People Count of the number of price
+	 * @return the number of people
+	 */
+    public int PeopleCount() {
+    	// Method refactored
+<span class="fc" id="L289">       	int peopleCount = 0;</span>
+    	       	   	
+<span class="fc bfc" id="L291" title="All 2 branches covered.">	    for(int i : numOfChildList) {</span>
+<span class="fc" id="L292"> 	    	peopleCount += i;</span>
+<span class="fc" id="L293"> 	    }</span>
+ 	    
+<span class="fc bfc" id="L295" title="All 2 branches covered."> 	    for(int i : numOfAdultList) {</span>
+<span class="fc" id="L296"> 	    	peopleCount += i;</span>
+<span class="fc" id="L297"> 	    }</span>
+ 	    
+<span class="fc bfc" id="L299" title="All 2 branches covered."> 	    for(int i : numOftoodlerist) {</span>
+<span class="fc" id="L300"> 	    	peopleCount += i;</span>
+<span class="fc" id="L301"> 	    }</span>
+    		    
+<span class="fc" id="L303"> 	    return peopleCount;</span>
+    }
+
+
+    /**
+     * 
+     * it confirmed all the tourist if the number of tourist &gt; 20 and &lt; 50 for tourist.
+     * 
+     * 
+     * 
+     */
+    public void notAllConfirmed() {
+    	try {
+<span class="fc" id="L316">        Connection connection = getConnection2();</span>
+<span class="fc" id="L317">		PreparedStatement stmt = connection.prepareStatement(&quot;SELECT name,id FROM TourInf where tripname = ? AND (tourfee - amount_paid) &lt;= 0 &quot;);</span>
+<span class="fc" id="L318">		stmt.setString(1,tn);</span>
+<span class="fc" id="L319">		ResultSet rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L320" title="All 2 branches covered.">		while(rs.next()) {</span>
+<span class="pc bpc" id="L321" title="1 of 2 branches missed.">			if(PeopleCount2() &gt;= 20) {</span>
+<span class="fc" id="L322">			ConfirmedCustomer.add(rs.getString(&quot;name&quot;));</span>
+<span class="fc" id="L323">			idtest.add(rs.getString(&quot;id&quot;));</span>
+			}
+<span class="nc bnc" id="L325" title="All 2 branches missed.">			else if(PeopleCount2() &lt; 20) {</span>
+<span class="nc" id="L326">			ConfirmedCustomerNE.add(rs.getString(&quot;name&quot;));</span>
+<span class="nc" id="L327">			NccID.add(rs.getString(&quot;id&quot;));</span>
+			}
+<span class="fc" id="L329">			ccID.add(rs.getString(&quot;id&quot;));</span>
+		}
+<span class="fc" id="L331">        rs.close();</span>
+<span class="fc" id="L332">        stmt.close();</span>
+<span class="fc" id="L333">        connection.close();</span>
+     // SET CONFIRMED CUSTOMER
+<span class="fc bfc" id="L335" title="All 2 branches covered.">     for(int i = 0; i &lt; ConfirmedCustomer.size(); i++) {</span>
+<span class="fc" id="L336">    	      confirmedto.add(new Tourist(ConfirmedCustomer.get(i) , 0 ) );</span>
+     }
+     // SET NOT CONFIRMED CUSTOMER
+     
+<span class="fc" id="L340">    	}catch(Exception e) {</span>
+    		
+<span class="fc" id="L342">    	}</span>
+    	
+    	
+    	
+    	try {
+<span class="fc" id="L347">    		Connection connection = getConnection2();</span>
+<span class="fc" id="L348">    		PreparedStatement stmt = connection.prepareStatement(&quot;SELECT name,id FROM TourInf where tripname = ? AND (tourfee - amount_paid) &gt; 0 &quot;);</span>
+<span class="fc" id="L349">    		stmt.setString(1,tn);</span>
+<span class="fc" id="L350">    		ResultSet rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L351" title="All 2 branches covered.">    		while(rs.next()) {</span>
+<span class="pc bpc" id="L352" title="1 of 2 branches missed.">    		    if(PeopleCount2() &gt;= 20) {</span>
+<span class="fc" id="L353">    			NConfirmedCustomer.add(rs.getString(&quot;name&quot;));</span>
+<span class="fc" id="L354">    			idtest2.add(rs.getString(&quot;id&quot;));</span>
+    		    }
+<span class="nc bnc" id="L356" title="All 2 branches missed.">    		    else if(PeopleCount2() &lt; 20) {</span>
+<span class="nc" id="L357">    		    	NConfirmedCustomerNE.add(rs.getString(&quot;name&quot;));</span>
+<span class="nc" id="L358">    		    	NccIDN.add(rs.getString(&quot;id&quot;));</span>
+    		    }
+<span class="fc" id="L360">    		    ccID.add(rs.getString(&quot;id&quot;));</span>
+    		}
+<span class="fc" id="L362">            rs.close();</span>
+<span class="fc" id="L363">            stmt.close();</span>
+<span class="fc" id="L364">            connection.close();</span>
+<span class="fc bfc" id="L365" title="All 2 branches covered.">            for(int i = 0; i &lt; NConfirmedCustomer.size(); i++) {</span>
+<span class="fc" id="L366">      	      unpaidto.add(new Tourist(NConfirmedCustomer.get(i) , 0 ) );</span>
+       }      
+<span class="fc" id="L368">    	}catch(Exception e) {</span>
+    		
+    		
+<span class="fc" id="L371">    	}</span>
+    	// if the situation for paid customer
+    	/*
+    for(Tourist t:confirmedto) {
+    	if(PeopleCount2() &gt;= 50 &amp;&amp; t.getTourName(t).equals(tn) ) {
+   		 //k.postText(event.getSource().getUserId(),&quot;Hi,Customer,I am going to updated your trip status : Success&quot;);
+   		// if success, then notify success and contact the guide ,controller.posttext(id,text)
+   	    // if failure, cancel the tour
+   		}else if(PeopleCount2() &gt;= 20 &amp;&amp; PeopleCount2() &lt; 50 &amp;&amp; t.getTourName(t).equals(tn)) {     
+   	    //k.postText(event.getSource().getUserId(),&quot;Hi,Customer,I am going to updated your trip status : Success &quot;);  
+   	    // if success, then notify success and contact the guide, then notify success and contact the guide ,controller.posttext(id,text)
+       }else if(PeopleCount2() &lt; 20 &amp;&amp; t.getTourName(t).equals(tn)) {
+       //k.postText(event.getSource().getUserId(),&quot;Hi,Customer,I am going to updated your trip status : Failure &quot;);
+   	    // if failure, cancel the tour
+       }
+    }
+    	
+    for(Tourist t:unpaidto) {
+    	if(PeopleCount2() &gt;= 50 &amp;&amp; t.getTourName(t).equals(tn) ) {
+    		//controller.postText(&quot;U53250c5aaa0ebc147a426e384e5d751c&quot;,&quot;Hi,Customer,I am going to updated your trip status : failure &quot;);
+   		// if success, then notify success and contact the guide ,controller.posttext(id,text)
+   	    // if failure, cancel the tour
+   		}else if(PeopleCount2() &gt;= 20 &amp;&amp; PeopleCount2() &lt; 50 &amp;&amp; t.getTourName(t).equals(tn)) {     
+   	    //k.postText(event.getSource().getUserId(),&quot;Hi,Customer,I am going to updated your trip status : Success &quot;);  
+   	    // if success, then notify success and contact the guide, then notify success and contact the guide ,controller.posttext(id,text)
+       }else if(PeopleCount2() &lt; 20 &amp;&amp; t.getTourName(t).equals(tn)) {
+       //k.postText(event.getSource().getUserId(),&quot;Hi,Customer,I am going to updated your trip status : Failure &quot;);
+   	    // if failure, cancel the tour
+       }
+    }
+    	*/
+    	
+<span class="fc" id="L403">    }</span>
+    /**
+     * not All for temp status of tourist.
+     * 
+     */
+	public void notAll() {   
+		//controller.hehe();
+		//tmp called only
+ 	    //Observer Pattern used, solved bug and each notification only takes using the tripName instead of Tourist name.
+<span class="fc bfc" id="L412" title="All 2 branches covered.">		for(Tourist t : tourist) </span>
+        {
+<span class="pc bpc" id="L414" title="1 of 4 branches missed.">            if(PeopleCount() &gt;= 50 &amp;&amp; t.getTourName(t).equals(tn) ) {</span>
+<span class="fc" id="L415">            	t.update(2,tn);</span>
+            }
+<span class="pc bpc" id="L417" title="4 of 6 branches missed.">            else if(PeopleCount() &gt;= 20 &amp;&amp; PeopleCount() &lt; 50 &amp;&amp; t.getTourName(t).equals(tn)) {     </span>
+<span class="nc" id="L418">            t.update(1,tn);</span>
+            }
+<span class="pc bpc" id="L420" title="3 of 4 branches missed.">            else if(PeopleCount() &lt; 20 &amp;&amp; t.getTourName(t).equals(tn)){  </span>
+<span class="nc" id="L421">            t.update(0,tn);</span>
+            }
+<span class="fc" id="L423">        }</span>
+<span class="fc" id="L424">	}</span>
+	
+	/**
+	 * 
+	 * getconnection 
+	 * @return the connection 
+	 * @throws URISyntaxException is the url exception 
+	 * @throws SQLException is the sql exception 
+	 */
+	
+	private Connection getConnection2() throws URISyntaxException, SQLException {
+		Connection connection;
+<span class="fc" id="L436">		URI dbUri = new URI(&quot;postgres://itniqlvmjieeeq:1bf7632721043bf02f0f498974ece3939ed3e947b9c96435ca0ced9d06593f33@ec2-107-22-235-167.compute-1.amazonaws.com:5432/daj5i9364g5dfv&quot;);</span>
+<span class="fc" id="L437">		String username = dbUri.getUserInfo().split(&quot;:&quot;)[0];</span>
+<span class="fc" id="L438">		String password = dbUri.getUserInfo().split(&quot;:&quot;)[1];</span>
+<span class="fc" id="L439">		String dbUrl = &quot;jdbc:postgresql://&quot; + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath() +  &quot;?ssl=true&amp;sslfactory=org.postgresql.ssl.NonValidatingFactory&quot;;</span>
+
+<span class="fc" id="L441">		log.info(&quot;Username: {} Password: {}&quot;, username, password);</span>
+<span class="fc" id="L442">		log.info (&quot;dbUrl: {}&quot;, dbUrl);</span>
+		
+<span class="fc" id="L444">		connection = DriverManager.getConnection(dbUrl, username, password);</span>
+
+<span class="fc" id="L446">		return connection;</span>
+	}
+	
+	/**
+	 * 
+	 * return the number of confirmed tourist
+	 * @return the confirm number of toruist
+	 */
+	public List&lt;Tourist&gt; getConfirmedTourist(){
+<span class="fc" id="L455">		return confirmedto;</span>
+	}
+	
+	
+	/**
+	 * 
+	 * 
+	 * 
+	 * @return the number of size of confirmed customer
+	 */
+	public List&lt;String&gt; getStringSize() {
+<span class="fc" id="L466">		return ConfirmedCustomer;</span>
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @return non confirmed customer
+	 */
+	public List&lt;String&gt; getFailSize(){
+<span class="fc" id="L475">	   return NConfirmedCustomer;</span>
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @return the confirmed customer with non established
+	 */
+	public List&lt;String&gt; getNEConfirmed(){
+<span class="fc" id="L484">		return ConfirmedCustomerNE;</span>
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @return the non confirmed customer with non established
+	 */
+	public List&lt;String&gt; getNEConfirmedN(){
+<span class="fc" id="L493">		return NConfirmedCustomerNE;</span>
+	}
+	
+	
+	/**
+	 * 
+	 * 
+	 * @return ccid
+	 */
+	public List&lt;String&gt; getccid(){
+<span class="fc" id="L503">		return ccID;</span>
+	}
+
+	
+	/**
+	 * 
+	 * 
+	 * 
+	 * @return ccidn
+	 */
+	public List&lt;String&gt; getccidn(){
+<span class="fc" id="L514">		return ccIDN;</span>
+	}
+	
+	/**
+	 * 
+	 * 
+	 * 
+	 * @return nccid
+	 */
+	public List&lt;String&gt; getnccid(){
+<span class="fc" id="L524">		return NccID;</span>
+	}
+	/**
+	 * 
+	 * 
+	 * 
+	 * @return nccidn
+	 */
+	public List&lt;String&gt; getnccidn(){
+<span class="fc" id="L533">		return NccIDN;</span>
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @return idtest
+	 */
+	public List&lt;String&gt; getestid(){
+<span class="fc" id="L542">		return idtest;</span>
+	}
+	
+	/**
+	 * 
+	 * 
+	 * 
+	 * @return idtest2
+	 */
+	public List&lt;String&gt; getestid2(){
+<span class="fc" id="L552">		return idtest2;</span>
+	}
+	
+}
+
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>
